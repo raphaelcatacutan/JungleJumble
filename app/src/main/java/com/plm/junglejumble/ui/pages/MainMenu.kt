@@ -107,7 +107,7 @@ fun MainMenu(navController: NavController = rememberNavController()) {
             Spacer(modifier = Modifier.height(12.dp))
 
             Button(
-                onClick = {  },
+                onClick = { navController.navigate("leaderboard") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                 shape = RoundedCornerShape(5.dp),
                 modifier = Modifier
@@ -167,7 +167,7 @@ fun OptionsDialog(onDismiss: () -> Unit) {
 
                 SettingRow("🎵 MUSIC:", musicEnabled) { musicEnabled = it }
                 SettingRow("🔊 SOUND:", soundEnabled) { soundEnabled = it }
-                SettingRow("NOTIFICATION", notifEnabled) { notifEnabled = it }
+                SettingRow("NOTIFICATIONS", notifEnabled) { notifEnabled = it }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
