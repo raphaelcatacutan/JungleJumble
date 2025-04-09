@@ -187,18 +187,18 @@ fun OptionsDialog(onDismiss: () -> Unit) {
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.weight(1f).padding(end = 8.dp)
                     ) {
-                        Text("CANCEL", color = Color.White)
+                        Text("CANCEL", color = Color.White, fontSize = 12.sp)
                     }
                     Button(
                         onClick = {
-                            // Save the settings logic here
+                            // Save settings logic here
                             onDismiss()
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.weight(1f).padding(start = 8.dp)
                     ) {
-                        Text("SAVE", color = Color.White)
+                        Text("SAVE", color = Color.White, fontSize = 12.sp,)
                     }
                 }
             }
