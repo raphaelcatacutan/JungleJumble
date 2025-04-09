@@ -39,8 +39,7 @@ fun AppNavigation() {
         composable("login") { Login(navController) }
         composable("signup") { Signup(navController) }
         composable("main-menu") { MainMenu(navController) }
-        composable("leaderboard") { LeaderBoard(navController)
-        }
+        composable("leaderboard") { LeaderBoard(navController) }
     }
 
     AnimatedContent(targetState = navController.currentBackStackEntry) { _ ->

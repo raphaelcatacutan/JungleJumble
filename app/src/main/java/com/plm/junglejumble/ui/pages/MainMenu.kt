@@ -25,13 +25,17 @@ import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
-
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.window.DialogProperties
+import kotlin.system.exitProcess
 
 @Composable
 fun MainMenu(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
     val logoImage = painterResource(id = R.drawable.logo)
-    var showDialog by remember { mutableStateOf(false) }
+    var showOptionsDialog by remember { mutableStateOf(false) }
+    // Add a new state variable for the exit dialog
+    var showExitDialog by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -77,7 +81,7 @@ fun MainMenu(navController: NavController = rememberNavController()) {
             Spacer(modifier = Modifier.height(12.dp))
 
             Button(
-                onClick = { showDialog = true },
+                onClick = { showOptionsDialog = true },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                 shape = RoundedCornerShape(5.dp),
                 modifier = Modifier
@@ -87,8 +91,8 @@ fun MainMenu(navController: NavController = rememberNavController()) {
                 Text("OPTIONS")
             }
 
-            if (showDialog) {
-                OptionsDialog(onDismiss = { showDialog = false })
+            if (showOptionsDialog) {
+                OptionsDialog(onDismiss = { showOptionsDialog = false })
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -120,7 +124,7 @@ fun MainMenu(navController: NavController = rememberNavController()) {
             Spacer(modifier = Modifier.height(12.dp))
 
             Button(
-                onClick = {  },
+                onClick = { showExitDialog = true },  // Show exit dialog instead of navigating
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                 shape = RoundedCornerShape(5.dp),
                 modifier = Modifier
@@ -129,6 +133,11 @@ fun MainMenu(navController: NavController = rememberNavController()) {
             ) {
                 Text("EXIT")
             }
+        }
+
+        // Show exit dialog if state is true
+        if (showExitDialog) {
+            ExitDialog(onDismiss = { showExitDialog = false })
         }
     }
 }
@@ -221,6 +230,93 @@ fun SettingRow(label: String, state: Boolean, onToggle: (Boolean) -> Unit) {
                 uncheckedTrackColor = Color.LightGray
             )
         )
+    }
+}
+
+@Composable
+fun ExitDialog(onDismiss: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(16.dp)
+                .background(
+                    color = Color(0xFF73D478),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .padding(24.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Title
+                Text(
+                    text = "EXIT GAME",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier
+                        .background(Color(0xFF09A237), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Message
+                Text(
+                    text = "Are you sure you want to exit?",
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center,
+                    color = Color.White,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Buttons
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // No button
+                    Button(
+                        onClick = onDismiss,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                            .padding(end = 8.dp)
+                    ) {
+                        Text("NO", color = Color.White, fontSize = 16.sp)
+                    }
+
+                    // Yes button
+                    Button(
+                        onClick = {
+                            // Exit the app
+                            android.os.Process.killProcess(android.os.Process.myPid())
+                            exitProcess(0)
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                            .padding(start = 8.dp)
+                    ) {
+                        Text("YES", color = Color.White, fontSize = 16.sp)
+                    }
+                }
+            }
+        }
     }
 }
 

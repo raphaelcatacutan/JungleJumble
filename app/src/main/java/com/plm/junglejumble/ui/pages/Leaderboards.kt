@@ -173,15 +173,20 @@ fun LeaderboardRow(entry: LeaderboardEntry) {
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Rank
+        // Rank (with medals for top 3)
         Box(
             modifier = Modifier.weight(1f),
             contentAlignment = Alignment.Center
         ) {
             if (entry.isTopThree) {
-                // medals - 1st-3rd place
+                // Using medal emojis for top 3
                 Text(
-                    text = "👑",
+                    text = when(entry.rank) {
+                        1 -> "🏅"
+                        2 -> "🥈"
+                        3 -> "🥉"
+                        else -> entry.rank.toString()
+                    },
                     fontSize = 18.sp,
                     textAlign = TextAlign.Center
                 )
