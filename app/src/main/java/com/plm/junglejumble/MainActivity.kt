@@ -12,8 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.plm.junglejumble.ui.pages.Page1
-import com.plm.junglejumble.ui.pages.Page2
+import com.plm.junglejumble.ui.pages.Login
+import com.plm.junglejumble.ui.pages.Signup
 import com.plm.junglejumble.ui.theme.JungleJumbleTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,9 +33,9 @@ fun AppNavigation() {
     val navController = rememberNavController()
 
     // Add nalang dito ng mga pages
-    NavHost(navController = navController, startDestination = "page1") {
-        composable("page1") { Page1(navController) }
-        composable("page2") { Page2(navController) }
+    NavHost(navController = navController, startDestination = "login") {
+        composable("login") { Login(navController) }
+        composable("signup") { Signup(navController) }
     }
 
     AnimatedContent(targetState = navController.currentBackStackEntry) { _ ->
