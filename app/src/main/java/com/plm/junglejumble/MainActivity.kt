@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.ui.pages.Login
+import com.plm.junglejumble.ui.pages.MainMenu
 import com.plm.junglejumble.ui.pages.Signup
 import com.plm.junglejumble.ui.theme.JungleJumbleTheme
 
@@ -36,6 +37,7 @@ fun AppNavigation() {
     NavHost(navController = navController, startDestination = "login") {
         composable("login") { Login(navController) }
         composable("signup") { Signup(navController) }
+        composable("main-menu") { MainMenu(navController) }
     }
 
     AnimatedContent(targetState = navController.currentBackStackEntry) { _ ->

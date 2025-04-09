@@ -128,7 +128,9 @@ fun Signup(navController: NavController = rememberNavController()) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { /* handle login */ },
+                onClick = {
+                    navController.navigate("main-menu")
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -156,6 +158,6 @@ fun Signup(navController: NavController = rememberNavController()) {
 
 @Preview(showBackground = true)
 @Composable
-fun SignupLogin() {
+fun PreviewSignup() {
     Signup()
 }
