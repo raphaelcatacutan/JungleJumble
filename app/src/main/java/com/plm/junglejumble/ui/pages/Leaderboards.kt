@@ -36,7 +36,7 @@ data class LeaderboardEntry(
 )
 
 @Composable
-fun LeaderBoard(navController: NavController = rememberNavController()) {
+fun ViewLeaderBoard(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
 
     // placeholder - to be replaced with real scores
@@ -96,14 +96,14 @@ fun LeaderBoard(navController: NavController = rememberNavController()) {
             ) {
                 Column {
                     // Header row
-                    LeaderboardHeader()
+                    ComponentLeaderboardHeader()
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     // List of entries
                     LazyColumn {
                         items(leaderboardEntries) { entry ->
-                            LeaderboardRow(entry)
+                            ComponentLeaderboardRow(entry)
                         }
                     }
                 }
@@ -133,7 +133,7 @@ fun LeaderBoard(navController: NavController = rememberNavController()) {
 }
 
 @Composable
-fun LeaderboardHeader() {
+fun ComponentLeaderboardHeader() {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -166,7 +166,7 @@ fun LeaderboardHeader() {
 }
 
 @Composable
-fun LeaderboardRow(entry: LeaderboardEntry) {
+fun ComponentLeaderboardRow(entry: LeaderboardEntry) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -236,5 +236,5 @@ fun LeaderboardRow(entry: LeaderboardEntry) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewLeaderBoard() {
-    LeaderBoard()
+    ViewLeaderBoard()
 }

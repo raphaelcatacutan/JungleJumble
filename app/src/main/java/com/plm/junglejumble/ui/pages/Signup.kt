@@ -41,7 +41,7 @@ import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
 
 @Composable
-fun Signup(navController: NavController = rememberNavController()) {
+fun ViewSignup(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
     val logoImage = painterResource(id = R.drawable.logo)
 
@@ -159,5 +159,5 @@ fun Signup(navController: NavController = rememberNavController()) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewSignup() {
-    Signup()
+    ViewSignup()
 }

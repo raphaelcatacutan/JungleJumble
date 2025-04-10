@@ -19,7 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.draw.clip
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
@@ -30,7 +29,7 @@ import androidx.compose.ui.window.DialogProperties
 import kotlin.system.exitProcess
 
 @Composable
-fun MainMenu(navController: NavController = rememberNavController()) {
+fun ViewMainMenu(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
     val logoImage = painterResource(id = R.drawable.logo)
     var showOptionsDialog by remember { mutableStateOf(false) }
@@ -68,7 +67,9 @@ fun MainMenu(navController: NavController = rememberNavController()) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {  },
+                onClick = {
+                    navController.navigate("game")
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                 shape = RoundedCornerShape(5.dp),
                 modifier = Modifier
@@ -92,7 +93,7 @@ fun MainMenu(navController: NavController = rememberNavController()) {
             }
 
             if (showOptionsDialog) {
-                OptionsDialog(onDismiss = { showOptionsDialog = false })
+                DialogOption(onDismiss = { showOptionsDialog = false })
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -137,7 +138,7 @@ fun MainMenu(navController: NavController = rememberNavController()) {
 
         // Show exit dialog if state is true
         if (showExitDialog) {
-            ExitDialog(onDismiss = { showExitDialog = false })
+            DialogExit(onDismiss = { showExitDialog = false })
         }
     }
 }
@@ -145,11 +146,11 @@ fun MainMenu(navController: NavController = rememberNavController()) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewMainMenu() {
-    MainMenu()
+    ViewMainMenu()
 }
 
 @Composable
-fun OptionsDialog(onDismiss: () -> Unit) {
+fun DialogOption(onDismiss: () -> Unit) {
     var musicEnabled by remember { mutableStateOf(true) }
     var soundEnabled by remember { mutableStateOf(false) }
     var notifEnabled by remember { mutableStateOf(false) }
@@ -174,9 +175,9 @@ fun OptionsDialog(onDismiss: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                SettingRow("🎵 MUSIC:", musicEnabled) { musicEnabled = it }
-                SettingRow("🔊 SOUND:", soundEnabled) { soundEnabled = it }
-                SettingRow("NOTIFICATIONS", notifEnabled) { notifEnabled = it }
+                ComponentSettingRow("🎵 MUSIC:", musicEnabled) { musicEnabled = it }
+                ComponentSettingRow("🔊 SOUND:", soundEnabled) { soundEnabled = it }
+                ComponentSettingRow("NOTIFICATIONS", notifEnabled) { notifEnabled = it }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -207,7 +208,7 @@ fun OptionsDialog(onDismiss: () -> Unit) {
 }
 
 @Composable
-fun SettingRow(label: String, state: Boolean, onToggle: (Boolean) -> Unit) {
+fun ComponentSettingRow(label: String, state: Boolean, onToggle: (Boolean) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -234,7 +235,7 @@ fun SettingRow(label: String, state: Boolean, onToggle: (Boolean) -> Unit) {
 }
 
 @Composable
-fun ExitDialog(onDismiss: () -> Unit) {
+fun DialogExit(onDismiss: () -> Unit) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(

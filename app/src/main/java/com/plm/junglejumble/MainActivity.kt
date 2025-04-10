@@ -12,10 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.plm.junglejumble.ui.pages.LeaderBoard
-import com.plm.junglejumble.ui.pages.Login
-import com.plm.junglejumble.ui.pages.MainMenu
-import com.plm.junglejumble.ui.pages.Signup
+import com.plm.junglejumble.ui.pages.ViewGame
+import com.plm.junglejumble.ui.pages.ViewLeaderBoard
+import com.plm.junglejumble.ui.pages.ViewLogin
+import com.plm.junglejumble.ui.pages.ViewMainMenu
+import com.plm.junglejumble.ui.pages.ViewSignup
 import com.plm.junglejumble.ui.theme.JungleJumbleTheme
 
 class MainActivity : ComponentActivity() {
@@ -36,10 +37,11 @@ fun AppNavigation() {
 
     // Add nalang dito ng mga pages
     NavHost(navController = navController, startDestination = "login") {
-        composable("login") { Login(navController) }
-        composable("signup") { Signup(navController) }
-        composable("main-menu") { MainMenu(navController) }
-        composable("leaderboard") { LeaderBoard(navController) }
+        composable("login") { ViewLogin(navController) }
+        composable("signup") { ViewSignup(navController) }
+        composable("main-menu") { ViewMainMenu(navController) }
+        composable("leaderboard") { ViewLeaderBoard(navController) }
+        composable("game") { ViewGame(navController) }
     }
 
     AnimatedContent(targetState = navController.currentBackStackEntry) { _ ->

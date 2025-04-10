@@ -19,11 +19,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,7 +41,7 @@ import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
 
 @Composable
-fun Login(navController: NavController = rememberNavController()) {
+fun ViewLogin(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
     val logoImage = painterResource(id = R.drawable.logo)
 
@@ -149,5 +145,5 @@ fun Login(navController: NavController = rememberNavController()) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewLogin() {
-    Login()
+    ViewLogin()
 }
