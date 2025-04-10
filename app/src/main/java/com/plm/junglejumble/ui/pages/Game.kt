@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -40,16 +43,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
+import kotlin.system.exitProcess
 
 @Composable
 fun ViewGame(navController: NavController = rememberNavController()) {
+    var showPauseDialog by remember { mutableStateOf(false) }
+    var showGameOverDialog by remember { mutableStateOf(false) }
+
     val timer = remember { mutableStateOf("2:59") }
     val score = remember { mutableStateOf(0) }
     val flips = remember { mutableStateOf(0) }
@@ -82,7 +92,9 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                 )
 
                 IconButton(
-                    onClick = { /* TODO: Pause game */ },
+                    onClick = {
+                        showPauseDialog = true
+                    },
                     modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
@@ -101,6 +113,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                 modifier = Modifier
                     .background(Color(0xAA2ECC71), shape = RoundedCornerShape(16.dp))
                     .padding(horizontal = 24.dp, vertical = 8.dp)
+                    .clickable { showGameOverDialog = true },
             ) {
                 Text(
                     text = timer.value,
@@ -110,7 +123,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 3x3 Grid of Cards
+            // FIXME: Clicking cards at the same time
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -118,13 +131,13 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                 contentAlignment = Alignment.Center
             ) {
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
+                    columns = GridCells.Fixed(4),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier
                         .wrapContentHeight()
                 ) {
-                items(9) { index ->
+                items(36) { index ->
                     ComponentFlipCard()
                 }
             }
@@ -163,6 +176,16 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                     )
                 }
             }
+        }
+
+        // Show exit dialog if state is true
+        if (showPauseDialog) {
+            DialogPaused(onDismiss = { showPauseDialog = false })
+        }
+
+        // Show exit dialog if state is true
+        if (showGameOverDialog) {
+            DialogGameOver(onDismiss = { showGameOverDialog = false })
         }
     }
 }
@@ -217,4 +240,133 @@ fun ComponentFlipCard() {
 @Composable
 fun PreviewGame() {
     ViewGame()
+}
+
+@Composable
+fun DialogGameOver(onDismiss: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(16.dp)
+                .background(
+                    color = Color(0xFF73D478),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .padding(24.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Title
+                Text(
+                    text = "Game over",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier
+                        .background(Color(0xFF09A237), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+
+                // Resume button
+                Button(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    Text("Play Again", color = Color.White, fontSize = 16.sp)
+                }
+
+                // Exit button
+                Button(
+                    onClick = {
+                        android.os.Process.killProcess(android.os.Process.myPid())
+                        exitProcess(0)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    Text("Exit", color = Color.White, fontSize = 16.sp)
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun DialogPaused(onDismiss: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(16.dp)
+                .background(
+                    color = Color(0xFF73D478),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .padding(24.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Title
+                Text(
+                    text = "Game pause",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier
+                        .background(Color(0xFF09A237), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+
+                // Resume button
+                Button(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    Text("Resume", color = Color.White, fontSize = 16.sp)
+                }
+
+                // Exit button
+                Button(
+                    onClick = {
+                        android.os.Process.killProcess(android.os.Process.myPid())
+                        exitProcess(0)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    Text("Exit", color = Color.White, fontSize = 16.sp)
+                }
+            }
+        }
+    }
 }

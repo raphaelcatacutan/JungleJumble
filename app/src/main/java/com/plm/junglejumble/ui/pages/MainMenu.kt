@@ -36,6 +36,7 @@ fun ViewMainMenu(navController: NavController = rememberNavController()) {
     // Add a new state variable for the exit dialog
     var showExitDialog by remember { mutableStateOf(false) }
 
+    // FIXME: Back button shouldn't  navigate back to login/signup
     Box(
         modifier = Modifier
             .fillMaxSize()
