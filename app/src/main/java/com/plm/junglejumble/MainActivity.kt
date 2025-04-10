@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.plm.junglejumble.ui.pages.ViewCardCatalog
 import com.plm.junglejumble.ui.pages.ViewGame
 import com.plm.junglejumble.ui.pages.ViewLeaderBoard
 import com.plm.junglejumble.ui.pages.ViewLogin
@@ -42,6 +43,7 @@ fun AppNavigation() {
         composable("main-menu") { ViewMainMenu(navController) }
         composable("leaderboard") { ViewLeaderBoard(navController) }
         composable("game") { ViewGame(navController) }
+        composable("card_catalog") { ViewCardCatalog(navController) }
     }
 
     AnimatedContent(targetState = navController.currentBackStackEntry) { _ ->
