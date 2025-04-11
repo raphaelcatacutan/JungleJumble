@@ -1,5 +1,6 @@
 package com.plm.junglejumble.ui.pages
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,7 +45,8 @@ import com.plm.junglejumble.R
 fun ViewLogin(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
     val logoImage = painterResource(id = R.drawable.logo)
-
+    BackHandler(enabled = true) {
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()

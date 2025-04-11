@@ -1,6 +1,7 @@
 package com.plm.junglejumble.ui.pages
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,7 +42,10 @@ fun ViewMainMenu(navController: NavController = rememberNavController()) {
     var showExitDialog by remember { mutableStateOf(false) }
     var showDifficultyDialog by remember { mutableStateOf(false) }
 
-    // FIXME: Back button shouldn't  navigate back to login/signup
+    BackHandler(enabled = true) {
+        showExitDialog = true
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()

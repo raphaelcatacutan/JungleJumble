@@ -1,5 +1,6 @@
 package com.plm.junglejumble.ui.pages
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -62,7 +63,9 @@ fun ViewGame(navController: NavController = rememberNavController()) {
     val timer = remember { mutableStateOf("2:59") }
     val score = remember { mutableStateOf(0) }
     val flips = remember { mutableStateOf(0) }
-
+    BackHandler(enabled = true) {
+        showPauseDialog = true
+    }
     Box(modifier = Modifier.fillMaxSize()) {
 
         // Background Image
