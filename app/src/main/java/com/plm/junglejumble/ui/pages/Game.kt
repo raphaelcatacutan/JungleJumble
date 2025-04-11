@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,11 +25,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -309,6 +308,9 @@ fun DialogGameOver(onDismiss: () -> Unit) {
 
 @Composable
 fun DialogPaused(onDismiss: () -> Unit) {
+    var musicEnabled by remember { mutableStateOf(true) }
+    var soundEnabled by remember { mutableStateOf(false) }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -340,6 +342,9 @@ fun DialogPaused(onDismiss: () -> Unit) {
                         .padding(horizontal = 16.dp, vertical = 4.dp)
                 )
 
+                ComponentSettingRow("🎵 MUSIC:", musicEnabled) { musicEnabled = it }
+                ComponentSettingRow("🔊 SOUND:", soundEnabled) { soundEnabled = it }
+
                 // Resume button
                 Button(
                     onClick = onDismiss,
@@ -368,5 +373,33 @@ fun DialogPaused(onDismiss: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+
+@Composable
+fun ComponentSettingRow(label: String, state: Boolean, onToggle: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.weight(1f),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+        Switch(
+            checked = state,
+            onCheckedChange = onToggle,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = Color(0xFF69F0AE),
+                uncheckedTrackColor = Color.LightGray
+            )
+        )
     }
 }

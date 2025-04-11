@@ -38,7 +38,6 @@ import kotlin.system.exitProcess
 fun ViewMainMenu(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
     val logoImage = painterResource(id = R.drawable.logo)
-    var showOptionsDialog by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
     var showDifficultyDialog by remember { mutableStateOf(false) }
 
@@ -84,23 +83,6 @@ fun ViewMainMenu(navController: NavController = rememberNavController()) {
                     .height(56.dp)
             ) {
                 Text("PLAY")
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { showOptionsDialog = true },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
-                shape = RoundedCornerShape(5.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text("OPTIONS")
-            }
-
-            if (showOptionsDialog) {
-                DialogOption(onDismiss = { showOptionsDialog = false })
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -158,91 +140,6 @@ fun ViewMainMenu(navController: NavController = rememberNavController()) {
 @Composable
 fun PreviewMainMenu() {
     ViewMainMenu()
-}
-
-@Composable
-fun DialogOption(onDismiss: () -> Unit) {
-    var musicEnabled by remember { mutableStateOf(true) }
-    var soundEnabled by remember { mutableStateOf(false) }
-    var notifEnabled by remember { mutableStateOf(false) }
-
-    Dialog(onDismissRequest = onDismiss) {
-        Box(
-            modifier = Modifier
-                .padding(16.dp)
-                .background(Color(0xFF73D478), shape = RoundedCornerShape(16.dp))
-                .padding(24.dp)
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    "OPTIONS",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier
-                        .background(Color(0xFF09A237), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                ComponentSettingRow("🎵 MUSIC:", musicEnabled) { musicEnabled = it }
-                ComponentSettingRow("🔊 SOUND:", soundEnabled) { soundEnabled = it }
-                ComponentSettingRow("NOTIFICATIONS", notifEnabled) { notifEnabled = it }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-                    Button(
-                        onClick = onDismiss,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.weight(1f).padding(end = 8.dp)
-                    ) {
-                        Text("CANCEL", color = Color.White, fontSize = 12.sp)
-                    }
-                    Button(
-                        onClick = {
-                            // Save settings logic here
-                            onDismiss()
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.weight(1f).padding(start = 8.dp)
-                    ) {
-                        Text("SAVE", color = Color.White, fontSize = 12.sp,)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ComponentSettingRow(label: String, state: Boolean, onToggle: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.weight(1f),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-        Switch(
-            checked = state,
-            onCheckedChange = onToggle,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = Color(0xFF69F0AE),
-                uncheckedTrackColor = Color.LightGray
-            )
-        )
-    }
 }
 
 @Composable
