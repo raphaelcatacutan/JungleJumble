@@ -1,9 +1,12 @@
 package com.plm.junglejumble.ui.pages
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -23,6 +26,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.DialogProperties
@@ -34,6 +40,7 @@ fun ViewMainMenu(navController: NavController = rememberNavController()) {
     val logoImage = painterResource(id = R.drawable.logo)
     var showOptionsDialog by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
+    var showDifficultyDialog by remember { mutableStateOf(false) }
 
     // FIXME: Back button shouldn't  navigate back to login/signup
     Box(
@@ -68,7 +75,7 @@ fun ViewMainMenu(navController: NavController = rememberNavController()) {
 
             Button(
                 onClick = {
-                    navController.navigate("game")
+                    showDifficultyDialog = true
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                 shape = RoundedCornerShape(5.dp),
@@ -139,6 +146,10 @@ fun ViewMainMenu(navController: NavController = rememberNavController()) {
         // Show exit dialog if state is true
         if (showExitDialog) {
             DialogExit(onDismiss = { showExitDialog = false })
+        }
+
+        if (showDifficultyDialog) {
+            DialogDifficulty(onDismiss = { showDifficultyDialog = false }, navController)
         }
     }
 }
@@ -315,6 +326,121 @@ fun DialogExit(onDismiss: () -> Unit) {
                     ) {
                         Text("YES", color = Color.White, fontSize = 16.sp)
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DialogDifficulty(
+    onDismiss: () -> Unit,
+    navController: NavController
+) {
+    var difficulty by remember { mutableStateOf("Hard (6x6)") }
+    var time by remember { mutableStateOf("30 Second") }
+
+    val difficultyOptions = listOf("Easy (2x2)", "Medium (4x4)", "Hard (6x6)")
+    val timeOptions = listOf("15 Second", "30 Second", "60 Second")
+
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .background(Color(0xFF8BC34A), RoundedCornerShape(24.dp))
+                .padding(20.dp)
+                .fillMaxWidth()
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "SELECT\nDIFFICULTY",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = Color.Black
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                ComponentDropdownSelector("DIFFICULTY:", difficulty, difficultyOptions) {
+                    difficulty = it
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                ComponentDropdownSelector("TIME:", time, timeOptions) {
+                    time = it
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                IconButton(
+                    onClick = {
+                         onDismiss()
+                         navController.navigate("game")
+                    },
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(Color(0xFF2E7D32), CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "Start Game",
+                        tint = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+@Composable
+fun ComponentDropdownSelector(
+    label: String,
+    selected: String,
+    options: List<String>,
+    onSelect: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(horizontalAlignment = Alignment.Start) {
+        Text(text = label, fontWeight = FontWeight.Bold, color = Color.White)
+        Box {
+            OutlinedTextField(
+                value = selected,
+                onValueChange = {},
+                readOnly = true,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                trailingIcon = {
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                }
+            )
+
+            // Transparent clickable overlay
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.Transparent)
+                    .clickable {
+                        expanded = true
+                        Log.w("ComposeWarning", "Clicked")
+                    }
+            )
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                options.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(option) },
+                        onClick = {
+                            onSelect(option)
+                            expanded = false
+                        }
+                    )
                 }
             }
         }
