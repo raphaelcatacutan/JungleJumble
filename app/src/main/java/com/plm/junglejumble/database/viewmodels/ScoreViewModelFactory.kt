@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.plm.junglejumble.database.dao.ScoreDao
 import com.plm.junglejumble.database.dao.UserDao
 
+@Suppress("UNCHECKED_CAST")
 class ScoreViewModelFactory(private val dao: ScoreDao) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ScoreViewModel::class.java)) {
