@@ -22,11 +22,4 @@ class UserViewModel(private val dao: UserDao) : ViewModel() {
             loadUsers()
         }
     }
-
-    fun deleteUser(user: User) {
-        viewModelScope.launch {
-            dao.delete(user)
-            loadUsers()
-        }
-    }
 }

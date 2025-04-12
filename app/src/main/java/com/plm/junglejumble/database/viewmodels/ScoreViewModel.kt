@@ -22,11 +22,4 @@ class ScoreViewModel(private val dao: ScoreDao) : ViewModel() {
             loadScores()
         }
     }
-
-    fun deleteScore(score: Score) {
-        viewModelScope.launch {
-            dao.delete(score)
-            loadScores()
-        }
-    }
 }

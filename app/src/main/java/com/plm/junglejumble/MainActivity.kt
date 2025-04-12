@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
 import com.plm.junglejumble.ui.pages.ViewCardCatalog
 import com.plm.junglejumble.ui.pages.ViewGame
 import com.plm.junglejumble.ui.pages.ViewLeaderBoard
@@ -36,7 +37,6 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation() {
     val navController = rememberNavController()
 
-    // Add nalang dito ng mga pages
     NavHost(navController = navController, startDestination = "login") {
         composable("login") { ViewLogin(navController) }
         composable("signup") { ViewSignup(navController) }

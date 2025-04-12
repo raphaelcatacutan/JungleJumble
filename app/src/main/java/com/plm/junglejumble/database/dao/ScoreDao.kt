@@ -10,7 +10,4 @@ interface ScoreDao {
 
     @Query("SELECT * FROM Score")
     suspend fun getAllScores(): List<Score>
-
-    @Delete
-    suspend fun delete(score: Score)
 }

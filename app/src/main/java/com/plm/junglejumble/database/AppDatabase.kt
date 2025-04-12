@@ -5,8 +5,9 @@ import com.plm.junglejumble.database.dao.UserDao
 import com.plm.junglejumble.database.models.User
 import androidx.room.Room
 import com.plm.junglejumble.database.dao.ScoreDao
+import com.plm.junglejumble.database.models.Score
 
-@Database(entities = [User::class], version = 1)
+@Database(entities = [User::class, Score::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun scoreDao(): ScoreDao

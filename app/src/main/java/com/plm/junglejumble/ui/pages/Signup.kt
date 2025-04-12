@@ -1,5 +1,6 @@
 package com.plm.junglejumble.ui.pages
 
+import AppDatabase
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,20 +32,44 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
+import com.plm.junglejumble.database.models.Score
+import com.plm.junglejumble.database.viewmodels.UserViewModelFactory
+import com.plm.junglejumble.database.models.User
+import com.plm.junglejumble.database.viewmodels.ScoreViewModel
+import com.plm.junglejumble.database.viewmodels.ScoreViewModelFactory
+import com.plm.junglejumble.database.viewmodels.UserViewModel
 
 @Composable
 fun ViewSignup(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
     val logoImage = painterResource(id = R.drawable.logo)
+
+    val context = LocalContext.current
+
+    // Get DAO
+    val userDao = AppDatabase.getDatabase(context).userDao()
+    val scoreDao = AppDatabase.getDatabase(context).scoreDao()
+
+    // Create ViewModel with factory
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(userDao)
+    )
+    val scoreViewModel: ScoreViewModel = viewModel(
+        factory = ScoreViewModelFactory(scoreDao)
+    )
+
+
     BackHandler(enabled = true) {
     }
     Box(
@@ -131,6 +156,10 @@ fun ViewSignup(navController: NavController = rememberNavController()) {
 
             Button(
                 onClick = {
+                    userViewModel.addUser(User(name = "aa", password = "ass"))
+
+                    scoreViewModel.addScore(Score(ownerId = 1, score = 1))
+
                     navController.navigate("main-menu")
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
