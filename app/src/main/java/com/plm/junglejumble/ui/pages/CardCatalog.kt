@@ -219,7 +219,7 @@ fun ViewCardCatalog(navController: NavController = rememberNavController()) {
         ),
         AnimalCard(
             id = 15,
-            name = "Horny Groundstomp",
+            name = "Rhiny Groundstomp",
             subtitle = "Rhino",
             scientificName = "Rhinocerotidae family",
             physicalCharacteristics = "Large body, thick skin, and horn(s) on the snout.",
