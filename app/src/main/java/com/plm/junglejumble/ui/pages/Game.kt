@@ -33,7 +33,9 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,21 +55,37 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
-import kotlin.system.exitProcess
+import kotlinx.coroutines.delay
 
 @Composable
 fun ViewGame(navController: NavController = rememberNavController()) {
-    var showPauseDialog by remember { mutableStateOf(false) }
-    var showGameOverDialog by remember { mutableStateOf(false) }
+    var isPaused by remember { mutableStateOf(false) }
+    var isGameOver by remember { mutableStateOf(false) }
 
-    val timer = remember { mutableStateOf("2:59") }
-    val score = remember { mutableStateOf(0) }
-    val flips = remember { mutableStateOf(0) }
-    BackHandler(enabled = true) {
-        showPauseDialog = true
+    val score = remember { mutableIntStateOf(0) }
+    val flips = remember { mutableIntStateOf(0) }
+
+    var time by remember { mutableIntStateOf(120) }
+    val timer = "%02d:%02d".format(time / 60, time % 60)
+    val remainingCards by remember { mutableIntStateOf(16) }
+
+    LaunchedEffect(isPaused) {
+        while (true) {
+            if (!isPaused && !isGameOver) {
+                delay(1000L) // 1 second
+                time -= 1
+                if (time <= 0) isGameOver = true
+            } else {
+                delay(100L) // Small delay to avoid busy loop
+            }
+        }
     }
-    Box(modifier = Modifier.fillMaxSize()) {
 
+    BackHandler(enabled = true) {
+        isPaused = true
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
         // Background Image
         Image(
             painter = painterResource(id = R.drawable.background1), // 🖼️ set this
@@ -95,7 +113,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
 
                 IconButton(
                     onClick = {
-                        showPauseDialog = true
+                        isPaused = true
                     },
                     modifier = Modifier.size(36.dp)
                 ) {
@@ -115,10 +133,10 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                 modifier = Modifier
                     .background(Color(0xAA2ECC71), shape = RoundedCornerShape(16.dp))
                     .padding(horizontal = 24.dp, vertical = 8.dp)
-                    .clickable { showGameOverDialog = true },
+                    .clickable { isGameOver = true },
             ) {
                 Text(
-                    text = timer.value,
+                    text = timer,
                     style = MaterialTheme.typography.headlineSmall.copy(color = Color.White)
                 )
             }
@@ -161,7 +179,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "Flips: ${flips.value}",
+                        text = "Flips: ${flips.intValue}",
                         style = MaterialTheme.typography.bodyLarge.copy(color = Color.Black)
                     )
                 }
@@ -173,7 +191,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "Score: ${score.value}",
+                        text = "Score: ${score.intValue}",
                         style = MaterialTheme.typography.bodyLarge.copy(color = Color.Black)
                     )
                 }
@@ -181,13 +199,13 @@ fun ViewGame(navController: NavController = rememberNavController()) {
         }
 
         // Show exit dialog if state is true
-        if (showPauseDialog) {
-            DialogPaused(onDismiss = { showPauseDialog = false })
+        if (isPaused) {
+            DialogPaused(onDismiss = { isPaused = false }, navController)
         }
 
         // Show exit dialog if state is true
-        if (showGameOverDialog) {
-            DialogGameOver(onDismiss = { showGameOverDialog = false })
+        if (isGameOver) {
+            DialogGameOver(onDismiss = { isGameOver = false }, navController)
         }
     }
 }
@@ -228,7 +246,8 @@ fun ComponentFlipCard() {
                 fontSize = 20.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .padding(10.dp)
                     .graphicsLayer {
                         rotationY = 180f
@@ -245,7 +264,7 @@ fun PreviewGame() {
 }
 
 @Composable
-fun DialogGameOver(onDismiss: () -> Unit) {
+fun DialogGameOver(onDismiss: () -> Unit, navController: NavController) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -292,8 +311,7 @@ fun DialogGameOver(onDismiss: () -> Unit) {
                 // Exit button
                 Button(
                     onClick = {
-                        android.os.Process.killProcess(android.os.Process.myPid())
-                        exitProcess(0)
+                        navController.navigate("main-menu")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                     shape = RoundedCornerShape(12.dp),
@@ -310,7 +328,7 @@ fun DialogGameOver(onDismiss: () -> Unit) {
 
 
 @Composable
-fun DialogPaused(onDismiss: () -> Unit) {
+fun DialogPaused(onDismiss: () -> Unit, navController: NavController) {
     var musicEnabled by remember { mutableStateOf(true) }
     var soundEnabled by remember { mutableStateOf(false) }
 
@@ -363,8 +381,7 @@ fun DialogPaused(onDismiss: () -> Unit) {
                 // Exit button
                 Button(
                     onClick = {
-                        android.os.Process.killProcess(android.os.Process.myPid())
-                        exitProcess(0)
+                       navController.navigate("main-menu")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                     shape = RoundedCornerShape(12.dp),
