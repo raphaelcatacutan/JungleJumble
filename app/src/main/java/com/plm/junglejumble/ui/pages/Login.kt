@@ -40,13 +40,18 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
+import com.plm.junglejumble.utils.SessionManager
+import com.plm.junglejumble.utils.SessionManager.userViewModel
 
 @Composable
 fun ViewLogin(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
     val logoImage = painterResource(id = R.drawable.logo)
+    var errorMessage by remember { mutableStateOf("") }
+
     BackHandler(enabled = true) {
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -83,6 +88,16 @@ fun ViewLogin(navController: NavController = rememberNavController()) {
                 fontWeight = FontWeight.Bold
             )
 
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = errorMessage,
+                fontSize = 13.sp,
+                color = Color.Black,
+                modifier = Modifier.align(Alignment.Start)
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
             var username by remember { mutableStateOf("") }
@@ -117,7 +132,15 @@ fun ViewLogin(navController: NavController = rememberNavController()) {
 
             Button(
                 onClick = {
-                    navController.navigate("main-menu")
+                    val user = userViewModel?.users?.find {
+                        it.name == username && it.password == password
+                    }
+                    if (user == null) {
+                        errorMessage = "User not found"
+                    } else {
+                        SessionManager.currentUser = user;
+                        navController.navigate("main-menu")
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                 modifier = Modifier

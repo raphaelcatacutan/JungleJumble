@@ -49,29 +49,18 @@ import com.plm.junglejumble.database.models.User
 import com.plm.junglejumble.database.viewmodels.ScoreViewModel
 import com.plm.junglejumble.database.viewmodels.ScoreViewModelFactory
 import com.plm.junglejumble.database.viewmodels.UserViewModel
+import com.plm.junglejumble.utils.SessionManager
+import com.plm.junglejumble.utils.SessionManager.userViewModel
 
 @Composable
 fun ViewSignup(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
     val logoImage = painterResource(id = R.drawable.logo)
-
-    val context = LocalContext.current
-
-    // Get DAO
-    val userDao = AppDatabase.getDatabase(context).userDao()
-    val scoreDao = AppDatabase.getDatabase(context).scoreDao()
-
-    // Create ViewModel with factory
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(userDao)
-    )
-    val scoreViewModel: ScoreViewModel = viewModel(
-        factory = ScoreViewModelFactory(scoreDao)
-    )
-
+    var errorMessage by remember { mutableStateOf("") }
 
     BackHandler(enabled = true) {
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -106,6 +95,15 @@ fun ViewSignup(navController: NavController = rememberNavController()) {
                 fontSize = 24.sp,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = errorMessage,
+                fontSize = 13.sp,
+                color = Color.Black,
+                modifier = Modifier.align(Alignment.Start)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -156,11 +154,19 @@ fun ViewSignup(navController: NavController = rememberNavController()) {
 
             Button(
                 onClick = {
-                    userViewModel.addUser(User(name = "aa", password = "ass"))
-
-                    scoreViewModel.addScore(Score(ownerId = 1, score = 1))
-
-                    navController.navigate("main-menu")
+                    if (username.isEmpty() || password.isEmpty()) {
+                        errorMessage = "Username or password is empty"
+                    } else if (password != passwordVerify) {
+                        errorMessage = "Password doesn't match"
+                    } else {
+                        val user = User(name = username, password = password)
+                        userViewModel?.addUser(user)
+                        SessionManager.currentUser = user
+                        navController.navigate("main-menu")
+                    }
+                    val user = userViewModel?.users?.find {
+                        it.name == username && it.password == password
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                 modifier = Modifier
