@@ -46,7 +46,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,6 +54,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
+import com.plm.junglejumble.utils.generatePairs
 import kotlinx.coroutines.delay
 
 @Composable
@@ -67,7 +67,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
 
     var time by remember { mutableIntStateOf(120) }
     val timer = "%02d:%02d".format(time / 60, time % 60)
-    val remainingCards by remember { mutableIntStateOf(16) }
+    val remainingCards by remember { mutableIntStateOf(36) }
 
     LaunchedEffect(isPaused) {
         while (true) {
@@ -133,7 +133,6 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                 modifier = Modifier
                     .background(Color(0xAA2ECC71), shape = RoundedCornerShape(16.dp))
                     .padding(horizontal = 24.dp, vertical = 8.dp)
-                    .clickable { isGameOver = true },
             ) {
                 Text(
                     text = timer,
@@ -157,8 +156,10 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                     modifier = Modifier
                         .wrapContentHeight()
                 ) {
-                items(36) { index ->
-                    ComponentFlipCard()
+                val pairs = generatePairs(16)
+                items(16) { index ->
+                    val index = pairs.indexOfFirst { it.first == index || it.second == index }
+                    ComponentFlipCard(index)
                 }
             }
             }
@@ -211,7 +212,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
 }
 
 @Composable
-fun ComponentFlipCard() {
+fun ComponentFlipCard(index: Int) {
     var flipped by remember { mutableStateOf(false) }
     val rotation = animateFloatAsState(
         targetValue = if (flipped) 180f else 0f,
@@ -241,17 +242,14 @@ fun ComponentFlipCard() {
                 contentScale = ContentScale.Crop
             )
         } else {
-            Text(
-                text = "Hello World",
-                fontSize = 20.sp,
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(10.dp)
-                    .graphicsLayer {
-                        rotationY = 180f
-                    }
+            val imageId = animals[index].imageResId
+            Image(
+                painter = painterResource(id = imageId), // 🔄 your card back
+                contentDescription = "Jungle Card",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.graphicsLayer(
+                    rotationY = 180f
+                )
             )
         }
     }
@@ -311,6 +309,7 @@ fun DialogGameOver(onDismiss: () -> Unit, navController: NavController) {
                 // Exit button
                 Button(
                     onClick = {
+                        onDismiss()
                         navController.navigate("main-menu")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
@@ -325,7 +324,6 @@ fun DialogGameOver(onDismiss: () -> Unit, navController: NavController) {
         }
     }
 }
-
 
 @Composable
 fun DialogPaused(onDismiss: () -> Unit, navController: NavController) {
@@ -381,7 +379,8 @@ fun DialogPaused(onDismiss: () -> Unit, navController: NavController) {
                 // Exit button
                 Button(
                     onClick = {
-                       navController.navigate("main-menu")
+                        onDismiss()
+                        navController.navigate("main-menu")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                     shape = RoundedCornerShape(12.dp),
@@ -395,7 +394,6 @@ fun DialogPaused(onDismiss: () -> Unit, navController: NavController) {
         }
     }
 }
-
 
 @Composable
 fun ComponentSettingRow(label: String, state: Boolean, onToggle: (Boolean) -> Unit) {
