@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,6 +28,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
+import com.plm.junglejumble.database.models.Score
+import com.plm.junglejumble.utils.SessionManager.scoreViewModel
+import com.plm.junglejumble.utils.SessionManager.userViewModel
 
 data class LeaderboardEntry(
     val rank: Int,
@@ -39,15 +43,9 @@ data class LeaderboardEntry(
 fun ViewLeaderBoard(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
 
-    // placeholder - to be replaced with real scores
-    val leaderboardEntries = List(15) { index ->
-        LeaderboardEntry(
-            rank = if (index < 3) index + 1 else index + 1,
-            name = "FLOY",
-            score = 69,
-            isTopThree = index < 3
-        )
-    }
+    val leaderboardEntries: List<Score> = scoreViewModel?.scores
+        ?.sortedByDescending { it.score }
+        ?: emptyList()
 
     Box(
         modifier = Modifier
@@ -102,10 +100,11 @@ fun ViewLeaderBoard(navController: NavController = rememberNavController()) {
 
                     // List of entries
                     LazyColumn {
-                        items(leaderboardEntries) { entry ->
-                            ComponentLeaderboardRow(entry)
+                        itemsIndexed(leaderboardEntries) { index, entry ->
+                            ComponentLeaderboardRow(entry, index + 1)
                         }
                     }
+
                 }
             }
 
@@ -166,7 +165,7 @@ fun ComponentLeaderboardHeader() {
 }
 
 @Composable
-fun ComponentLeaderboardRow(entry: LeaderboardEntry) {
+fun ComponentLeaderboardRow(entry: Score, rank: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -178,21 +177,21 @@ fun ComponentLeaderboardRow(entry: LeaderboardEntry) {
             modifier = Modifier.weight(1f),
             contentAlignment = Alignment.Center
         ) {
-            if (entry.isTopThree) {
+            if (rank <= 3) {
                 // Using medal emojis for top 3
                 Text(
-                    text = when(entry.rank) {
+                    text = when(rank) {
                         1 -> "🏅"
                         2 -> "🥈"
                         3 -> "🥉"
-                        else -> entry.rank.toString()
+                        else -> rank.toString()
                     },
                     fontSize = 18.sp,
                     textAlign = TextAlign.Center
                 )
             } else {
                 Text(
-                    text = entry.rank.toString(),
+                    text = rank.toString(),
                     fontSize = 16.sp,
                     color = Color.White,
                     textAlign = TextAlign.Center
@@ -211,7 +210,7 @@ fun ComponentLeaderboardRow(entry: LeaderboardEntry) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = entry.name,
+                text = userViewModel?.users?.find { it.id ==  entry.ownerId}?.name ?: "None",
                 fontSize = 16.sp,
                 color = Color.Black,
                 textAlign = TextAlign.Center
