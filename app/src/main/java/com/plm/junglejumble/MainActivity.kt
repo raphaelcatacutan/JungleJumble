@@ -68,7 +68,11 @@ fun AppNavigation() {
         composable("signup") { ViewSignup(navController) }
         composable("main-menu") { ViewMainMenu(navController) }
         composable("leaderboard") { ViewLeaderBoard(navController) }
-        composable("game") { ViewGame(navController) }
+        composable("game/{cardNumber}/{duration}") { backStackEntry ->
+            val cardNumber = backStackEntry.arguments?.getString("cardNumber")?.toInt() ?: 16
+            val duration = backStackEntry.arguments?.getString("duration")?.toInt() ?: 120
+            ViewGame(cardNumber, duration, navController)
+        }
         composable("card_catalog") { ViewCardCatalog(navController) }
         composable("card-test") { CardGrid() }
     }

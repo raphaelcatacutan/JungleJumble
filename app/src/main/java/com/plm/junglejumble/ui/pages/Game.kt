@@ -64,6 +64,7 @@ import com.plm.junglejumble.utils.generatePairs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 
 data class CardItem(
@@ -72,7 +73,7 @@ data class CardItem(
 )
 
 @Composable
-fun ViewGame(navController: NavController = rememberNavController()) {
+fun ViewGame(cardCount: Int, duration: Int, navController: NavController = rememberNavController()) {
     var isPaused by remember { mutableStateOf(false) }
     var isGameOver by remember { mutableStateOf(false) }
     var gameOverReason by remember { mutableStateOf("") }
@@ -80,7 +81,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
     val score = remember { mutableIntStateOf(0) }
 
     // Timer
-    var time by remember { mutableIntStateOf(120) }
+    var time by remember { mutableIntStateOf(duration) }
     val timer = "%02d:%02d".format(time / 60, time % 60)
     LaunchedEffect(isPaused) {
         while (true) {
@@ -99,9 +100,8 @@ fun ViewGame(navController: NavController = rememberNavController()) {
     }
 
     // Cards
-    val cardCount = 16
     val pairs = remember {
-        generatePairs(16)
+        generatePairs(cardCount)
     }
     var cards by remember {
         mutableStateOf(
@@ -181,8 +181,9 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                     .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
+                val grid = sqrt(cardCount.toDouble()).toInt()
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(4),
+                    columns = GridCells.Fixed(grid),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier
@@ -348,7 +349,7 @@ fun ComponentFlipCard(
 @Preview(showBackground = true)
 @Composable
 fun PreviewGame() {
-    ViewGame()
+    ViewGame(16, 120)
 }
 
 @Composable
