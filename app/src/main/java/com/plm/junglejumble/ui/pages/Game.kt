@@ -1,5 +1,6 @@
 package com.plm.junglejumble.ui.pages
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -33,18 +34,22 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,22 +58,70 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
-import kotlin.system.exitProcess
+import com.plm.junglejumble.database.models.Score
+import com.plm.junglejumble.utils.PreferencesManager
+import com.plm.junglejumble.utils.SessionManager.currentUser
+import com.plm.junglejumble.utils.SessionManager.scoreViewModel
+import com.plm.junglejumble.utils.generatePairs
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
+import kotlin.math.sqrt
+
+
+data class CardItem(
+    val id: Int,
+    val isSelected: Boolean
+)
 
 @Composable
-fun ViewGame(navController: NavController = rememberNavController()) {
-    var showPauseDialog by remember { mutableStateOf(false) }
-    var showGameOverDialog by remember { mutableStateOf(false) }
+fun ViewGame(cardCount: Int, duration: Int, navController: NavController = rememberNavController()) {
+    var isPaused by remember { mutableStateOf(false) }
+    var isGameOver by remember { mutableStateOf(false) }
+    var gameOverReason by remember { mutableStateOf("") }
 
-    val timer = remember { mutableStateOf("2:59") }
-    val score = remember { mutableStateOf(0) }
-    val flips = remember { mutableStateOf(0) }
-    BackHandler(enabled = true) {
-        showPauseDialog = true
+    val score = remember { mutableIntStateOf(0) }
+
+    // Timer
+    var time by remember { mutableIntStateOf(duration) }
+    val timer = "%02d:%02d".format(time / 60, time % 60)
+    LaunchedEffect(isPaused) {
+        while (true) {
+            if (!isPaused && !isGameOver) {
+                delay(1000L) // 1 second
+                time -= 1
+                if (time <= 0) {
+                    isGameOver = true
+                    gameOverReason = "Timer ran out"
+                    scoreViewModel?.addScore(Score(ownerId = currentUser!!.id, score = score.intValue))
+                }
+            } else {
+                delay(100L) // Small delay to avoid busy loop
+            }
+        }
     }
-    Box(modifier = Modifier.fillMaxSize()) {
 
-        // Background Image
+    // Cards
+    val pairs = remember {
+        generatePairs(cardCount)
+    }
+    var cards by remember {
+        mutableStateOf(
+            List(cardCount) { index -> CardItem(id = index, isSelected = false) }
+        )
+    }
+
+    var remainingCards by remember { mutableIntStateOf(cardCount/2) }
+    var selectedIndices by remember { mutableStateOf<List<Int>>(emptyList()) }
+    var isProcessing by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    BackHandler(enabled = true) {
+        isPaused = true
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.background1), // 🖼️ set this
             contentDescription = null,
@@ -95,7 +148,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
 
                 IconButton(
                     onClick = {
-                        showPauseDialog = true
+                        isPaused = true
                     },
                     modifier = Modifier.size(36.dp)
                 ) {
@@ -115,34 +168,85 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                 modifier = Modifier
                     .background(Color(0xAA2ECC71), shape = RoundedCornerShape(16.dp))
                     .padding(horizontal = 24.dp, vertical = 8.dp)
-                    .clickable { showGameOverDialog = true },
             ) {
                 Text(
-                    text = timer.value,
+                    text = timer,
                     style = MaterialTheme.typography.headlineSmall.copy(color = Color.White)
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // FIXME: Clicking cards at the same time
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
+                val grid = sqrt(cardCount.toDouble()).toInt()
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(4),
+                    columns = GridCells.Fixed(grid),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier
                         .wrapContentHeight()
                 ) {
-                items(36) { index ->
-                    ComponentFlipCard()
+                    Log.w("ComposeWarning", pairs.toString())
+                    items(cardCount) { index ->
+                        val i = pairs.indexOfFirst { it.first == index || it.second == index }
+
+                        val card = cards[index]
+                        ComponentFlipCard(
+                            isSelected = card.isSelected,
+                            onClick = {
+                                if (isProcessing || card.isSelected) return@ComponentFlipCard
+
+                                selectedIndices = selectedIndices + index
+                                cards = cards.mapIndexed { i, item ->
+                                    if (i == index) item.copy(isSelected = true) else item
+                                }
+
+                                if (selectedIndices.size == 2) {
+                                    isProcessing = true
+                                    coroutineScope.launch {
+                                        delay(1000L)
+
+                                        val first = selectedIndices[0]
+                                        val second = selectedIndices[1]
+
+                                        val isMatch = pairs.any {
+                                            (it.first == first && it.second == second) || (it.first == second && it.second == first)
+                                        }
+
+                                        if (isMatch) {
+                                            val basePoints = 5
+                                            val multiplier = 0.1f
+                                            val bonus = (time * multiplier).roundToInt()
+                                            val pointsEarned = basePoints + bonus
+                                            score.intValue += pointsEarned
+                                            remainingCards--
+                                            if (remainingCards <= 0) {
+                                                isGameOver = true
+                                                gameOverReason = "You Won"
+                                                scoreViewModel?.addScore(Score(ownerId = currentUser!!.id, score = score.intValue))
+                                            }
+                                        } else {
+                                            cards = cards.mapIndexed { i, item ->
+                                                if (selectedIndices.contains(i)) item.copy(isSelected = false)
+                                                else item
+                                            }
+                                        }
+
+                                        selectedIndices = emptyList()
+                                        isProcessing = false
+                                    }
+                                }
+                            },
+                            index = i
+                        )
+                    }
+
                 }
-            }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -161,7 +265,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "Flips: ${flips.value}",
+                        text = "Remaining Pairs: ${remainingCards}",
                         style = MaterialTheme.typography.bodyLarge.copy(color = Color.Black)
                     )
                 }
@@ -173,7 +277,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "Score: ${score.value}",
+                        text = "Score: ${score.intValue}",
                         style = MaterialTheme.typography.bodyLarge.copy(color = Color.Black)
                     )
                 }
@@ -181,26 +285,29 @@ fun ViewGame(navController: NavController = rememberNavController()) {
         }
 
         // Show exit dialog if state is true
-        if (showPauseDialog) {
-            DialogPaused(onDismiss = { showPauseDialog = false })
+        if (isPaused) {
+            DialogPaused(onDismiss = { isPaused = false }, navController, coroutineScope)
         }
 
         // Show exit dialog if state is true
-        if (showGameOverDialog) {
-            DialogGameOver(onDismiss = { showGameOverDialog = false })
+        if (isGameOver) {
+            DialogGameOver(onDismiss = { isGameOver = false }, navController, gameOverReason, cardCount, duration)
         }
     }
 }
 
 @Composable
-fun ComponentFlipCard() {
-    var flipped by remember { mutableStateOf(false) }
+fun ComponentFlipCard(
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    index: Int
+)
+{
     val rotation = animateFloatAsState(
-        targetValue = if (flipped) 180f else 0f,
+        targetValue = if (isSelected) 180f else 0f,
         animationSpec = tween(durationMillis = 600),
         label = "rotation"
     )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -213,7 +320,9 @@ fun ComponentFlipCard() {
                 color = Color(0xFFB2FF59), // any color you want
                 shape = RoundedCornerShape(16.dp)
             )
-            .clickable { flipped = !flipped },
+            .clickable {
+                onClick()
+            },
         contentAlignment = Alignment.Center,
     ) {
         if (rotation.value <= 90f) {
@@ -223,16 +332,14 @@ fun ComponentFlipCard() {
                 contentScale = ContentScale.Crop
             )
         } else {
-            Text(
-                text = "Hello World",
-                fontSize = 20.sp,
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxSize()
-                    .padding(10.dp)
-                    .graphicsLayer {
-                        rotationY = 180f
-                    }
+            val imageId = animals[index].imageResId
+            Image(
+                painter = painterResource(id = imageId), // 🔄 your card back
+                contentDescription = "Jungle Card",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.graphicsLayer(
+                    rotationY = 180f
+                )
             )
         }
     }
@@ -241,11 +348,11 @@ fun ComponentFlipCard() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewGame() {
-    ViewGame()
+    ViewGame(16, 120)
 }
 
 @Composable
-fun DialogGameOver(onDismiss: () -> Unit) {
+fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, gameOverReason: String, cardCount: Int, duration: Int) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -268,7 +375,7 @@ fun DialogGameOver(onDismiss: () -> Unit) {
             ) {
                 // Title
                 Text(
-                    text = "Game over",
+                    text = gameOverReason,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
@@ -279,7 +386,10 @@ fun DialogGameOver(onDismiss: () -> Unit) {
 
                 // Resume button
                 Button(
-                    onClick = onDismiss,
+                    onClick = {
+                        onDismiss()
+                        navController.navigate("game/${cardCount}/${duration}")
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
@@ -292,8 +402,8 @@ fun DialogGameOver(onDismiss: () -> Unit) {
                 // Exit button
                 Button(
                     onClick = {
-                        android.os.Process.killProcess(android.os.Process.myPid())
-                        exitProcess(0)
+                        onDismiss()
+                        navController.navigate("main-menu")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                     shape = RoundedCornerShape(12.dp),
@@ -308,11 +418,26 @@ fun DialogGameOver(onDismiss: () -> Unit) {
     }
 }
 
-
 @Composable
-fun DialogPaused(onDismiss: () -> Unit) {
-    var musicEnabled by remember { mutableStateOf(true) }
-    var soundEnabled by remember { mutableStateOf(false) }
+fun DialogPaused(onDismiss: () -> Unit, navController: NavController, coroutineScope: CoroutineScope) {
+    val context = LocalContext.current
+
+    var musicFlow = remember { PreferencesManager.getMusic(context) }
+    var soundFlow = remember { PreferencesManager.getSounds(context) }
+
+    val musicEnabledDatastore by musicFlow.collectAsState(initial = false)
+    val soundEnabledDatastore by soundFlow.collectAsState(initial = false)
+
+    var musicEnabled by remember { mutableStateOf(musicEnabledDatastore) }
+    var soundEnabled by remember { mutableStateOf(soundEnabledDatastore) }
+
+    LaunchedEffect(musicEnabledDatastore) {
+        musicEnabled = musicEnabledDatastore
+    }
+
+    LaunchedEffect(soundEnabledDatastore) {
+        soundEnabled = soundEnabledDatastore
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -345,8 +470,18 @@ fun DialogPaused(onDismiss: () -> Unit) {
                         .padding(horizontal = 16.dp, vertical = 4.dp)
                 )
 
-                ComponentSettingRow("🎵 MUSIC:", musicEnabled) { musicEnabled = it }
-                ComponentSettingRow("🔊 SOUND:", soundEnabled) { soundEnabled = it }
+                ComponentSettingRow("🎵 MUSIC:", musicEnabled) {
+                    musicEnabled = it
+                    coroutineScope.launch {
+                        PreferencesManager.saveMusic(musicEnabled, context)
+                    }
+                }
+                ComponentSettingRow("🔊 SOUND:", soundEnabled) {
+                    soundEnabled = it
+                    coroutineScope.launch {
+                        PreferencesManager.saveSounds(soundEnabled, context)
+                    }
+                }
 
                 // Resume button
                 Button(
@@ -363,8 +498,8 @@ fun DialogPaused(onDismiss: () -> Unit) {
                 // Exit button
                 Button(
                     onClick = {
-                        android.os.Process.killProcess(android.os.Process.myPid())
-                        exitProcess(0)
+                        onDismiss()
+                        navController.navigate("main-menu")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                     shape = RoundedCornerShape(12.dp),
@@ -378,7 +513,6 @@ fun DialogPaused(onDismiss: () -> Unit) {
         }
     }
 }
-
 
 @Composable
 fun ComponentSettingRow(label: String, state: Boolean, onToggle: (Boolean) -> Unit) {

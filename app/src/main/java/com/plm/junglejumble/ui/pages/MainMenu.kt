@@ -238,10 +238,10 @@ fun DialogDifficulty(
     onDismiss: () -> Unit,
     navController: NavController
 ) {
-    var difficulty by remember { mutableStateOf("Hard (6x6)") }
+    var difficulty by remember { mutableStateOf("Medium (4x4)") }
     var time by remember { mutableStateOf("30 Second") }
 
-    val difficultyOptions = listOf("Easy (2x2)", "Medium (4x4)", "Hard (6x6)")
+    val difficultyOptions = listOf("Easy (3x4)", "Medium (4x4)", "Hard (6x6)")
     val timeOptions = listOf("15 Second", "30 Second", "60 Second")
 
     Dialog(onDismissRequest = onDismiss) {
@@ -279,8 +279,20 @@ fun DialogDifficulty(
 
                 IconButton(
                     onClick = {
-                         onDismiss()
-                         navController.navigate("game")
+                        onDismiss()
+                        val cardNumber = when (difficultyOptions.indexOf(difficulty)) {
+                            0 -> 12
+                            1 -> 16
+                            2 -> 36
+                            else -> 16
+                        }
+                        val duration = when (timeOptions.indexOf(time)) {
+                            0 -> 15
+                            1 -> 30
+                            2 -> 60
+                            else -> 30
+                        }
+                        navController.navigate("game/$cardNumber/$duration")
                     },
                     modifier = Modifier
                         .size(56.dp)
