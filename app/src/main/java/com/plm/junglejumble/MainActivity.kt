@@ -1,5 +1,6 @@
 package com.plm.junglejumble
 
+import CardGrid
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -62,13 +63,14 @@ fun AppNavigation() {
     u.loadUsers()
     s.loadScores()
 
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = "game") {
         composable("login") { ViewLogin(navController) }
         composable("signup") { ViewSignup(navController) }
         composable("main-menu") { ViewMainMenu(navController) }
         composable("leaderboard") { ViewLeaderBoard(navController) }
         composable("game") { ViewGame(navController) }
         composable("card_catalog") { ViewCardCatalog(navController) }
+        composable("card-test") { CardGrid() }
     }
 
     AnimatedContent(targetState = navController.currentBackStackEntry) { _ ->

@@ -137,6 +137,7 @@ fun ViewLogin(navController: NavController = rememberNavController()) {
                     }
                     if (user == null) {
                         errorMessage = "User not found"
+                        navController.navigate("main-menu") // TODO: Remove this
                     } else {
                         SessionManager.currentUser = user;
                         navController.navigate("main-menu")

@@ -1,5 +1,6 @@
 package com.plm.junglejumble.ui.pages
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -36,8 +37,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +59,13 @@ import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
 import com.plm.junglejumble.utils.generatePairs
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+
+data class CardItem(
+    val id: Int,
+    val isSelected: Boolean
+)
 
 @Composable
 fun ViewGame(navController: NavController = rememberNavController()) {
@@ -67,8 +77,10 @@ fun ViewGame(navController: NavController = rememberNavController()) {
 
     var time by remember { mutableIntStateOf(120) }
     val timer = "%02d:%02d".format(time / 60, time % 60)
-    val remainingCards by remember { mutableIntStateOf(36) }
+    var remainingCards by remember { mutableIntStateOf(36) }
 
+
+    // Timer
     LaunchedEffect(isPaused) {
         while (true) {
             if (!isPaused && !isGameOver) {
@@ -80,6 +92,19 @@ fun ViewGame(navController: NavController = rememberNavController()) {
             }
         }
     }
+
+    // Cards
+    val cardCount = 16
+    val pairs = generatePairs(16)
+    var cards by remember {
+        mutableStateOf(
+            List(cardCount) { index -> CardItem(id = index, isSelected = false) }
+        )
+    }
+
+    var selectedIndices by remember { mutableStateOf<List<Int>>(emptyList()) }
+    var isProcessing by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     BackHandler(enabled = true) {
         isPaused = true
@@ -156,12 +181,44 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                     modifier = Modifier
                         .wrapContentHeight()
                 ) {
-                val pairs = generatePairs(16)
-                items(16) { index ->
-                    val index = pairs.indexOfFirst { it.first == index || it.second == index }
-                    ComponentFlipCard(index)
+                    items(cardCount) { index ->
+                        val partner = pairs.find { it.first == index || it.second == index }
+                            ?.let { if (it.first == index) it.second else it.first }
+
+                        val card = cards[index]
+                        ComponentFlipCard(
+                            isSelected = card.isSelected,
+                            onClick = {
+                                if (isProcessing || card.isSelected) return@ComponentFlipCard
+
+                                // Select the card
+                                selectedIndices = selectedIndices + index
+                                cards = cards.mapIndexed { i, item ->
+                                    if (i == index) item.copy(isSelected = true) else item
+                                }
+
+                                // If 2 cards are selected, start delay and reset
+                                if (selectedIndices.size == 2) {
+                                    isProcessing = true
+                                    coroutineScope.launch {
+                                        delay(500L)
+
+                                        cards = cards.mapIndexed { i, item ->
+                                            if (selectedIndices.contains(i)) item.copy(isSelected = false)
+                                            else item
+                                        }
+
+                                        selectedIndices = emptyList()
+                                        isProcessing = false
+                                    }
+                                }
+                            },
+                            index = index,
+                            partner = partner
+                        )
+                    }
+
                 }
-            }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -212,14 +269,18 @@ fun ViewGame(navController: NavController = rememberNavController()) {
 }
 
 @Composable
-fun ComponentFlipCard(index: Int) {
-    var flipped by remember { mutableStateOf(false) }
+fun ComponentFlipCard(
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    index: Int,
+    partner: Int?
+)
+{
     val rotation = animateFloatAsState(
-        targetValue = if (flipped) 180f else 0f,
+        targetValue = if (isSelected) 180f else 0f,
         animationSpec = tween(durationMillis = 600),
         label = "rotation"
     )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -232,7 +293,9 @@ fun ComponentFlipCard(index: Int) {
                 color = Color(0xFFB2FF59), // any color you want
                 shape = RoundedCornerShape(16.dp)
             )
-            .clickable { flipped = !flipped },
+            .clickable {
+                onClick()
+            },
         contentAlignment = Alignment.Center,
     ) {
         if (rotation.value <= 90f) {
@@ -296,7 +359,9 @@ fun DialogGameOver(onDismiss: () -> Unit, navController: NavController) {
 
                 // Resume button
                 Button(
-                    onClick = onDismiss,
+                    onClick = {
+                        navController.navigate("game")
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
