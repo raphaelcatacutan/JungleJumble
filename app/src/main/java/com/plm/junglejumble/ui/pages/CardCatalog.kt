@@ -438,19 +438,6 @@ fun ComponentAnimalCardDisplay(animalCard: AnimalCard, modifier: Modifier = Modi
 }
 
 @Composable
-fun ComponentInfoText(text: String, isFunFact: Boolean = false) {
-    Text(
-        text = text,
-        color = Color.White,
-        fontSize = 6.sp,
-        fontWeight = if (isFunFact) FontWeight.Bold else FontWeight.Normal,
-        fontStyle = if (isFunFact) FontStyle.Italic else FontStyle.Normal,
-        lineHeight = 16.sp,
-        modifier = Modifier.padding(vertical = 2.dp)
-    )
-}
-
-@Composable
 fun ComponentLabeledInfo(label: String, value: String, isFunFact: Boolean = false) {
     Column(modifier = Modifier.padding(vertical = 2.dp)) {
         Text(
