@@ -63,7 +63,7 @@ fun AppNavigation() {
     u.loadUsers()
     s.loadScores()
 
-    NavHost(navController = navController, startDestination = "game") {
+    NavHost(navController = navController, startDestination = "login") {
         composable("login") { ViewLogin(navController) }
         composable("signup") { ViewSignup(navController) }
         composable("main-menu") { ViewMainMenu(navController) }

@@ -57,6 +57,9 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
+import com.plm.junglejumble.database.models.Score
+import com.plm.junglejumble.utils.SessionManager.currentUser
+import com.plm.junglejumble.utils.SessionManager.scoreViewModel
 import com.plm.junglejumble.utils.generatePairs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -72,6 +75,8 @@ data class CardItem(
 fun ViewGame(navController: NavController = rememberNavController()) {
     var isPaused by remember { mutableStateOf(false) }
     var isGameOver by remember { mutableStateOf(false) }
+    var gameOverReason by remember { mutableStateOf("") }
+
     val score = remember { mutableIntStateOf(0) }
 
     // Timer
@@ -82,7 +87,11 @@ fun ViewGame(navController: NavController = rememberNavController()) {
             if (!isPaused && !isGameOver) {
                 delay(1000L) // 1 second
                 time -= 1
-                if (time <= 0) isGameOver = true
+                if (time <= 0) {
+                    isGameOver = true
+                    gameOverReason = "Timer ran out"
+                    scoreViewModel?.addScore(Score(ownerId = currentUser!!.id, score = score.intValue))
+                }
             } else {
                 delay(100L) // Small delay to avoid busy loop
             }
@@ -215,7 +224,11 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                                             val pointsEarned = basePoints + bonus
                                             score.intValue += pointsEarned
                                             remainingCards--
-                                            if (remainingCards <= 0) isGameOver = true
+                                            if (remainingCards <= 0) {
+                                                isGameOver = true
+                                                gameOverReason = "You Won"
+                                                scoreViewModel?.addScore(Score(ownerId = currentUser!!.id, score = score.intValue))
+                                            }
                                         } else {
                                             // ❌ Not a match – flip them back
                                             cards = cards.mapIndexed { i, item ->
@@ -278,7 +291,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
 
         // Show exit dialog if state is true
         if (isGameOver) {
-            DialogGameOver(onDismiss = { isGameOver = false }, navController)
+            DialogGameOver(onDismiss = { isGameOver = false }, navController, gameOverReason)
         }
     }
 }
@@ -339,7 +352,7 @@ fun PreviewGame() {
 }
 
 @Composable
-fun DialogGameOver(onDismiss: () -> Unit, navController: NavController) {
+fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, gameOverReason: String) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -362,7 +375,7 @@ fun DialogGameOver(onDismiss: () -> Unit, navController: NavController) {
             ) {
                 // Title
                 Text(
-                    text = "Game over",
+                    text = gameOverReason,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,

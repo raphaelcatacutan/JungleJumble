@@ -210,7 +210,7 @@ fun ComponentLeaderboardRow(entry: Score, rank: Int) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = userViewModel?.users?.find { it.id ==  entry.ownerId}?.name ?: "None",
+                text = userViewModel?.users?.find { it.id == entry.ownerId}?.name ?: "None",
                 fontSize = 16.sp,
                 color = Color.Black,
                 textAlign = TextAlign.Center
