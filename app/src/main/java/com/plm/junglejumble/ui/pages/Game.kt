@@ -269,7 +269,7 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "Remaining Pairs: ${remainingCards}",
+                        text = "Remaining Pairs: $remainingCards",
                         style = MaterialTheme.typography.bodyLarge.copy(color = Color.Black)
                     )
                 }
@@ -431,8 +431,8 @@ fun DialogPaused(
 ) {
     val context = LocalContext.current
 
-    var musicFlow = remember { PreferencesManager.getMusic(context) }
-    var soundFlow = remember { PreferencesManager.getSounds(context) }
+    val musicFlow = remember { PreferencesManager.getMusic(context) }
+    val soundFlow = remember { PreferencesManager.getSounds(context) }
 
     val musicEnabledDatastore by musicFlow.collectAsState(initial = false)
     val soundEnabledDatastore by soundFlow.collectAsState(initial = false)
@@ -487,7 +487,7 @@ fun DialogPaused(
                         .padding(horizontal = 16.dp, vertical = 4.dp)
                 )
 
-                // Music toggle with dynamic playback control
+                // Music
                 ComponentSettingRow("🎵 MUSIC:", musicEnabled) { isEnabled ->
                     musicEnabled = isEnabled
                     coroutineScope.launch {
