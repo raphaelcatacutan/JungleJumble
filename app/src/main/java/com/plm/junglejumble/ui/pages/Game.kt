@@ -35,9 +35,9 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,9 +59,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
 import com.plm.junglejumble.database.models.Score
+import com.plm.junglejumble.utils.PreferencesManager
 import com.plm.junglejumble.utils.SessionManager.currentUser
 import com.plm.junglejumble.utils.SessionManager.scoreViewModel
 import com.plm.junglejumble.utils.generatePairs
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -119,7 +122,6 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Background Image
         Image(
             painter = painterResource(id = R.drawable.background1), // 🖼️ set this
             contentDescription = null,
@@ -199,13 +201,11 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
                             onClick = {
                                 if (isProcessing || card.isSelected) return@ComponentFlipCard
 
-                                // Select the card
                                 selectedIndices = selectedIndices + index
                                 cards = cards.mapIndexed { i, item ->
                                     if (i == index) item.copy(isSelected = true) else item
                                 }
 
-                                // If 2 cards are selected, start delay and reset
                                 if (selectedIndices.size == 2) {
                                     isProcessing = true
                                     coroutineScope.launch {
@@ -231,7 +231,6 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
                                                 scoreViewModel?.addScore(Score(ownerId = currentUser!!.id, score = score.intValue))
                                             }
                                         } else {
-                                            // ❌ Not a match – flip them back
                                             cards = cards.mapIndexed { i, item ->
                                                 if (selectedIndices.contains(i)) item.copy(isSelected = false)
                                                 else item
@@ -287,7 +286,7 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
 
         // Show exit dialog if state is true
         if (isPaused) {
-            DialogPaused(onDismiss = { isPaused = false }, navController)
+            DialogPaused(onDismiss = { isPaused = false }, navController, coroutineScope)
         }
 
         // Show exit dialog if state is true
@@ -420,9 +419,25 @@ fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, gameOver
 }
 
 @Composable
-fun DialogPaused(onDismiss: () -> Unit, navController: NavController) {
-    var musicEnabled by remember { mutableStateOf(true) }
-    var soundEnabled by remember { mutableStateOf(false) }
+fun DialogPaused(onDismiss: () -> Unit, navController: NavController, coroutineScope: CoroutineScope) {
+    val context = LocalContext.current
+
+    var musicFlow = remember { PreferencesManager.getMusic(context) }
+    var soundFlow = remember { PreferencesManager.getSounds(context) }
+
+    val musicEnabledDatastore by musicFlow.collectAsState(initial = false)
+    val soundEnabledDatastore by soundFlow.collectAsState(initial = false)
+
+    var musicEnabled by remember { mutableStateOf(musicEnabledDatastore) }
+    var soundEnabled by remember { mutableStateOf(soundEnabledDatastore) }
+
+    LaunchedEffect(musicEnabledDatastore) {
+        musicEnabled = musicEnabledDatastore
+    }
+
+    LaunchedEffect(soundEnabledDatastore) {
+        soundEnabled = soundEnabledDatastore
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -455,8 +470,18 @@ fun DialogPaused(onDismiss: () -> Unit, navController: NavController) {
                         .padding(horizontal = 16.dp, vertical = 4.dp)
                 )
 
-                ComponentSettingRow("🎵 MUSIC:", musicEnabled) { musicEnabled = it }
-                ComponentSettingRow("🔊 SOUND:", soundEnabled) { soundEnabled = it }
+                ComponentSettingRow("🎵 MUSIC:", musicEnabled) {
+                    musicEnabled = it
+                    coroutineScope.launch {
+                        PreferencesManager.saveMusic(musicEnabled, context)
+                    }
+                }
+                ComponentSettingRow("🔊 SOUND:", soundEnabled) {
+                    soundEnabled = it
+                    coroutineScope.launch {
+                        PreferencesManager.saveSounds(soundEnabled, context)
+                    }
+                }
 
                 // Resume button
                 Button(
