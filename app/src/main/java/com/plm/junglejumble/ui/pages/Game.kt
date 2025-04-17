@@ -292,7 +292,7 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
 
         // Show exit dialog if state is true
         if (isGameOver) {
-            DialogGameOver(onDismiss = { isGameOver = false }, navController, gameOverReason)
+            DialogGameOver(onDismiss = { isGameOver = false }, navController, gameOverReason, cardCount, duration)
         }
     }
 }
@@ -353,7 +353,7 @@ fun PreviewGame() {
 }
 
 @Composable
-fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, gameOverReason: String) {
+fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, gameOverReason: String, cardCount: Int, duration: Int) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -388,7 +388,8 @@ fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, gameOver
                 // Resume button
                 Button(
                     onClick = {
-                        navController.navigate("game")
+                        onDismiss()
+                        navController.navigate("game/${cardCount}/${duration}")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
                     shape = RoundedCornerShape(12.dp),
