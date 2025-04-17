@@ -95,7 +95,9 @@ fun ViewGame(navController: NavController = rememberNavController()) {
 
     // Cards
     val cardCount = 16
-    val pairs = generatePairs(16)
+    val pairs = remember {
+        generatePairs(16)
+    }
     var cards by remember {
         mutableStateOf(
             List(cardCount) { index -> CardItem(id = index, isSelected = false) }
@@ -181,7 +183,9 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                     modifier = Modifier
                         .wrapContentHeight()
                 ) {
+                    Log.w("ComposeWarning", pairs.toString())
                     items(cardCount) { index ->
+                        val i = pairs.indexOfFirst { it.first == index || it.second == index }
                         val partner = pairs.find { it.first == index || it.second == index }
                             ?.let { if (it.first == index) it.second else it.first }
 
@@ -201,11 +205,23 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                                 if (selectedIndices.size == 2) {
                                     isProcessing = true
                                     coroutineScope.launch {
-                                        delay(500L)
+                                        delay(1000L)
 
-                                        cards = cards.mapIndexed { i, item ->
-                                            if (selectedIndices.contains(i)) item.copy(isSelected = false)
-                                            else item
+                                        val first = selectedIndices[0]
+                                        val second = selectedIndices[1]
+
+                                        val isMatch = pairs.any {
+                                            (it.first == first && it.second == second) || (it.first == second && it.second == first)
+                                        }
+
+                                        if (isMatch) {
+                                            remainingCards-=2
+                                        } else {
+                                            // ❌ Not a match – flip them back
+                                            cards = cards.mapIndexed { i, item ->
+                                                if (selectedIndices.contains(i)) item.copy(isSelected = false)
+                                                else item
+                                            }
                                         }
 
                                         selectedIndices = emptyList()
@@ -213,7 +229,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                                     }
                                 }
                             },
-                            index = index,
+                            index = i,
                             partner = partner
                         )
                     }
