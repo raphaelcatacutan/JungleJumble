@@ -60,6 +60,7 @@ import com.plm.junglejumble.R
 import com.plm.junglejumble.utils.generatePairs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 
 data class CardItem(
@@ -71,16 +72,11 @@ data class CardItem(
 fun ViewGame(navController: NavController = rememberNavController()) {
     var isPaused by remember { mutableStateOf(false) }
     var isGameOver by remember { mutableStateOf(false) }
-
     val score = remember { mutableIntStateOf(0) }
-    val flips = remember { mutableIntStateOf(0) }
-
-    var time by remember { mutableIntStateOf(120) }
-    val timer = "%02d:%02d".format(time / 60, time % 60)
-    var remainingCards by remember { mutableIntStateOf(36) }
-
 
     // Timer
+    var time by remember { mutableIntStateOf(120) }
+    val timer = "%02d:%02d".format(time / 60, time % 60)
     LaunchedEffect(isPaused) {
         while (true) {
             if (!isPaused && !isGameOver) {
@@ -104,6 +100,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
         )
     }
 
+    var remainingCards by remember { mutableIntStateOf(cardCount/2) }
     var selectedIndices by remember { mutableStateOf<List<Int>>(emptyList()) }
     var isProcessing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -169,7 +166,6 @@ fun ViewGame(navController: NavController = rememberNavController()) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // FIXME: Clicking cards at the same time
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -186,8 +182,6 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                     Log.w("ComposeWarning", pairs.toString())
                     items(cardCount) { index ->
                         val i = pairs.indexOfFirst { it.first == index || it.second == index }
-                        val partner = pairs.find { it.first == index || it.second == index }
-                            ?.let { if (it.first == index) it.second else it.first }
 
                         val card = cards[index]
                         ComponentFlipCard(
@@ -215,7 +209,13 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                                         }
 
                                         if (isMatch) {
-                                            remainingCards-=2
+                                            val basePoints = 5
+                                            val multiplier = 0.1f
+                                            val bonus = (time * multiplier).roundToInt()
+                                            val pointsEarned = basePoints + bonus
+                                            score.intValue += pointsEarned
+                                            remainingCards--
+                                            if (remainingCards <= 0) isGameOver = true
                                         } else {
                                             // ❌ Not a match – flip them back
                                             cards = cards.mapIndexed { i, item ->
@@ -229,8 +229,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                                     }
                                 }
                             },
-                            index = i,
-                            partner = partner
+                            index = i
                         )
                     }
 
@@ -253,7 +252,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "Flips: ${flips.intValue}",
+                        text = "Remaining Pairs: ${remainingCards}",
                         style = MaterialTheme.typography.bodyLarge.copy(color = Color.Black)
                     )
                 }
@@ -288,8 +287,7 @@ fun ViewGame(navController: NavController = rememberNavController()) {
 fun ComponentFlipCard(
     isSelected: Boolean,
     onClick: () -> Unit,
-    index: Int,
-    partner: Int?
+    index: Int
 )
 {
     val rotation = animateFloatAsState(
