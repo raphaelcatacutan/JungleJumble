@@ -1,5 +1,6 @@
 package com.plm.junglejumble.ui.pages
 
+import android.content.Context
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
@@ -63,12 +64,14 @@ import com.plm.junglejumble.utils.PreferencesManager
 import com.plm.junglejumble.utils.SessionManager.currentUser
 import com.plm.junglejumble.utils.SessionManager.scoreViewModel
 import com.plm.junglejumble.utils.generatePairs
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
+import android.media.MediaPlayer
+import kotlinx.coroutines.CoroutineScope
 
+var mediaPlayer: MediaPlayer? = null
 
 data class CardItem(
     val id: Int,
@@ -80,6 +83,7 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
     var isPaused by remember { mutableStateOf(false) }
     var isGameOver by remember { mutableStateOf(false) }
     var gameOverReason by remember { mutableStateOf("") }
+
 
     val score = remember { mutableIntStateOf(0) }
 
@@ -265,7 +269,7 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "Remaining Pairs: ${remainingCards}",
+                        text = "Remaining Pairs: $remainingCards",
                         style = MaterialTheme.typography.bodyLarge.copy(color = Color.Black)
                     )
                 }
@@ -418,12 +422,17 @@ fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, gameOver
     }
 }
 
+
 @Composable
-fun DialogPaused(onDismiss: () -> Unit, navController: NavController, coroutineScope: CoroutineScope) {
+fun DialogPaused(
+    onDismiss: () -> Unit,
+    navController: NavController,
+    coroutineScope: CoroutineScope
+) {
     val context = LocalContext.current
 
-    var musicFlow = remember { PreferencesManager.getMusic(context) }
-    var soundFlow = remember { PreferencesManager.getSounds(context) }
+    val musicFlow = remember { PreferencesManager.getMusic(context) }
+    val soundFlow = remember { PreferencesManager.getSounds(context) }
 
     val musicEnabledDatastore by musicFlow.collectAsState(initial = false)
     val soundEnabledDatastore by soundFlow.collectAsState(initial = false)
@@ -431,10 +440,18 @@ fun DialogPaused(onDismiss: () -> Unit, navController: NavController, coroutineS
     var musicEnabled by remember { mutableStateOf(musicEnabledDatastore) }
     var soundEnabled by remember { mutableStateOf(soundEnabledDatastore) }
 
+    // Sync music state with datastore
     LaunchedEffect(musicEnabledDatastore) {
         musicEnabled = musicEnabledDatastore
+        // Automatically play/stop music when the state changes
+        if (musicEnabled) {
+            playMusic(context)
+        } else {
+            stopMusic()
+        }
     }
 
+    // Sync sound state with datastore
     LaunchedEffect(soundEnabledDatastore) {
         soundEnabled = soundEnabledDatastore
     }
@@ -470,14 +487,23 @@ fun DialogPaused(onDismiss: () -> Unit, navController: NavController, coroutineS
                         .padding(horizontal = 16.dp, vertical = 4.dp)
                 )
 
-                ComponentSettingRow("🎵 MUSIC:", musicEnabled) {
-                    musicEnabled = it
+                // Music
+                ComponentSettingRow("🎵 MUSIC:", musicEnabled) { isEnabled ->
+                    musicEnabled = isEnabled
                     coroutineScope.launch {
                         PreferencesManager.saveMusic(musicEnabled, context)
+
+                        if (musicEnabled) {
+                            playMusic(context = context)
+                        } else {
+                            stopMusic()
+                        }
                     }
                 }
-                ComponentSettingRow("🔊 SOUND:", soundEnabled) {
-                    soundEnabled = it
+
+                // Sound toggle
+                ComponentSettingRow("🔊 SOUND:", soundEnabled) { isEnabled ->
+                    soundEnabled = isEnabled
                     coroutineScope.launch {
                         PreferencesManager.saveSounds(soundEnabled, context)
                     }
@@ -512,6 +538,23 @@ fun DialogPaused(onDismiss: () -> Unit, navController: NavController, coroutineS
             }
         }
     }
+}
+
+fun playMusic(context: Context) {
+    if (mediaPlayer == null) {
+        mediaPlayer = MediaPlayer.create(context, R.raw.bg_music) // Replace with your actual music file in `res/raw`
+        mediaPlayer?.isLooping = true // Optional: Loop the music
+        mediaPlayer?.start()
+    }
+
+}
+
+
+// Stop music function
+fun stopMusic() {
+    mediaPlayer?.stop()
+    mediaPlayer?.release()
+    mediaPlayer = null
 }
 
 @Composable
