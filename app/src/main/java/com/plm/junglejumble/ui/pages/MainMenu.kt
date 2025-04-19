@@ -31,6 +31,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.DialogProperties
 import com.plm.junglejumble.ui.components.ComponentThreeDContainer
@@ -165,7 +167,6 @@ fun ViewMainMenu(navController: NavController = rememberNavController()) {
 fun PreviewMainMenu() {
     ViewMainMenu()
 }
-
 @Composable
 fun DialogExit(onDismiss: () -> Unit) {
     Dialog(
@@ -177,78 +178,80 @@ fun DialogExit(onDismiss: () -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .padding(16.dp)
-                .background(
-                    color = Color(0xFF73D478),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                .padding(24.dp)
+                .fillMaxSize()
+                .wrapContentHeight()
+                .graphicsLayer(clip = false)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
+            ComponentThreeDContainer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(450.dp)
+                    .padding(top = 110.dp, bottom = 50.dp),
+                backgroundColor = Color(0xFF455A64),
+                shadowColor = Color(0xFF263238),
+                cornerRadius = 15.dp,
+                isPushable = false,
             ) {
-                // Title
-                Text(
-                    text = "EXIT GAME",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
                     modifier = Modifier
-                        .background(Color(0xFF09A237), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Message
-                Text(
-                    text = "Are you sure you want to exit?",
-                    fontSize = 18.sp,
-                    textAlign = TextAlign.Center,
-                    color = Color.White,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Buttons
-                Row(
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    modifier = Modifier.fillMaxWidth()
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp)
+                        .padding(top = 20.dp)
                 ) {
-                    // No button
-                    Button(
-                        onClick = onDismiss,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
-                        shape = RoundedCornerShape(12.dp),
+                    Text(
+                        text = "Are you sure you want to exit to your home screen?",
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color.White
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    ComponentThreeDContainer(
                         modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp)
-                            .padding(end = 8.dp)
+                            .fillMaxWidth()
+                            .height(55.dp),
+                        backgroundColor = Color(0xFF78909C),
+                        shadowColor = Color(0xFF546E7A),
+                        cornerRadius = 15.dp,
+                        isPushable = true,
+                        onClick = onDismiss
                     ) {
-                        Text("NO", color = Color.White, fontSize = 16.sp)
+                        Text("NO", color = Color(0xFFF5F5DC))
                     }
 
-                    // Yes button
-                    Button(
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ComponentThreeDContainer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(55.dp),
+                        backgroundColor = Color(0xFFEF5350),
+                        shadowColor = Color(0xFFC62828),
+                        cornerRadius = 15.dp,
+                        isPushable = true,
                         onClick = {
-                            // Exit the app
                             android.os.Process.killProcess(android.os.Process.myPid())
                             exitProcess(0)
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp)
-                            .padding(start = 8.dp)
+                        }
                     ) {
-                        Text("YES", color = Color.White, fontSize = 16.sp)
+                        Text("YES", color = Color(0xFFF5F5DC))
                     }
                 }
             }
+
+
+            // Logo "floating" above dialog content
+            Image(
+                painter = painterResource(id = R.drawable.paused),
+                contentDescription = "Logo",
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-30).dp)
+                    .size(230.dp)
+            )
         }
     }
 }

@@ -64,7 +64,7 @@ fun AppNavigation() {
     u.loadUsers()
     s.loadScores()
 
-    NavHost(navController = navController, startDestination = "main-menu") {
+    NavHost(navController = navController, startDestination = "login") {
         composable("test") { TestPage() }
         composable("login") { ViewLogin(navController) }
         composable("signup") { ViewSignup(navController) }
