@@ -273,6 +273,7 @@ fun ViewSignup(navController: NavController = rememberNavController()) {
                 }
             }
         }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
