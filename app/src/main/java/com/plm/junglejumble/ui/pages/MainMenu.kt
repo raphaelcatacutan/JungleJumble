@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.*
@@ -267,67 +268,94 @@ fun DialogDifficulty(
     val difficultyOptions = listOf("Easy (3x4)", "Medium (4x4)", "Hard (6x6)")
     val timeOptions = listOf("15 Second", "30 Second", "60 Second")
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false
+        )
+    ) {
         Box(
             modifier = Modifier
-                .background(Color(0xFF8BC34A), RoundedCornerShape(24.dp))
-                .padding(20.dp)
-                .fillMaxWidth()
+                .fillMaxSize()
+                .wrapContentHeight()
+                .graphicsLayer(clip = false)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+            ComponentThreeDContainer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(480.dp)
+                    .padding(top = 120.dp, bottom = 50.dp),
+                backgroundColor = Color(0xFF455A64),
+                shadowColor = Color(0xFF263238),
+                cornerRadius = 15.dp,
+                isPushable = false,
             ) {
-                Text(
-                    text = "SELECT\nDIFFICULTY",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    color = Color.Black
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                ComponentDropdownSelector("DIFFICULTY:", difficulty, difficultyOptions) {
-                    difficulty = it
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                ComponentDropdownSelector("TIME:", time, timeOptions) {
-                    time = it
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                IconButton(
-                    onClick = {
-                        onDismiss()
-                        val cardNumber = when (difficultyOptions.indexOf(difficulty)) {
-                            0 -> 12
-                            1 -> 16
-                            2 -> 36
-                            else -> 16
-                        }
-                        val duration = when (timeOptions.indexOf(time)) {
-                            0 -> 15
-                            1 -> 30
-                            2 -> 60
-                            else -> 30
-                        }
-                        navController.navigate("game/$cardNumber/$duration")
-                    },
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
                     modifier = Modifier
-                        .size(56.dp)
-                        .background(Color(0xFF2E7D32), CircleShape)
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp)
+                        .padding(top = 20.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Start Game",
-                        tint = Color.White
-                    )
+                    ComponentDropdownSelector("DIFFICULTY:", difficulty, difficultyOptions) {
+                        difficulty = it
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ComponentDropdownSelector("TIME:", time, timeOptions) {
+                        time = it
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ComponentThreeDContainer(
+                        modifier = Modifier
+                            .height(55.dp)
+                            .width(55.dp),
+                        backgroundColor = Color(0xFF6B8E23),
+                        shadowColor = Color(0xFF4A5F17),
+                        cornerRadius = 15.dp,
+                        isPushable = true,
+                        onClick = {
+
+                            onDismiss()
+                            val cardNumber = when (difficultyOptions.indexOf(difficulty)) {
+                                0 -> 12
+                                1 -> 16
+                                2 -> 36
+                                else -> 16
+                            }
+                            val duration = when (timeOptions.indexOf(time)) {
+                                0 -> 15
+                                1 -> 30
+                                2 -> 60
+                                else -> 30
+                            }
+                            navController.navigate("game/$cardNumber/$duration")
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Start Game",
+                            tint = Color.White
+                        )
+                    }
                 }
             }
+
+
+            // Logo "floating" above dialog content
+            Image(
+                painter = painterResource(id = R.drawable.paused),
+                contentDescription = "Logo",
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-30).dp)
+                    .size(230.dp)
+            )
         }
     }
 }
@@ -367,7 +395,10 @@ fun ComponentDropdownSelector(
 
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .width(200.dp) // Match the width of the text field
+                    .background(Color(0xFF607D8B))
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
