@@ -20,6 +20,7 @@ import com.plm.junglejumble.database.viewmodels.ScoreViewModel
 import com.plm.junglejumble.database.viewmodels.ScoreViewModelFactory
 import com.plm.junglejumble.database.viewmodels.UserViewModel
 import com.plm.junglejumble.database.viewmodels.UserViewModelFactory
+import com.plm.junglejumble.ui.pages.TestPage
 import com.plm.junglejumble.ui.pages.ViewCardCatalog
 import com.plm.junglejumble.ui.pages.ViewGame
 import com.plm.junglejumble.ui.pages.ViewLeaderBoard
@@ -63,7 +64,8 @@ fun AppNavigation() {
     u.loadUsers()
     s.loadScores()
 
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = "signup") {
+        composable("test") { TestPage() }
         composable("login") { ViewLogin(navController) }
         composable("signup") { ViewSignup(navController) }
         composable("main-menu") { ViewMainMenu(navController) }
