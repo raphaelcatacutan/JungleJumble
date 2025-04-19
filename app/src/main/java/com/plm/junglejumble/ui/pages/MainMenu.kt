@@ -33,6 +33,9 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.DialogProperties
+import com.plm.junglejumble.ui.components.ComponentThreeDContainer
+import com.plm.junglejumble.utils.SessionManager
+import com.plm.junglejumble.utils.SessionManager.userViewModel
 import kotlin.system.exitProcess
 
 @Composable
@@ -56,77 +59,94 @@ fun ViewMainMenu(navController: NavController = rememberNavController()) {
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
-            alpha = 0.8f
+            alpha = 0.8f,
         )
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 32.dp),
+                .padding(
+                    horizontal = 50.dp
+                ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
+        ) {
+            Spacer(modifier = Modifier.height(100.dp))
+
+            ComponentThreeDContainer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(65.dp),
+                backgroundColor = Color(0xFF6B8E23),
+                shadowColor = Color(0xFF4A5F17),
+                cornerRadius = 15.dp,
+                isPushable = true,
+                onClick = {
+                    showDifficultyDialog = true
+                }
+            ) {
+                Text("PLAY", color = Color(0xFFF5F5DC))
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ComponentThreeDContainer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(65.dp),
+                backgroundColor = Color(0xFF5C4033),
+                shadowColor = Color(0xFF3A261C),
+                cornerRadius = 15.dp,
+                isPushable = true,
+                onClick = { navController.navigate("card_catalog") }
+            ) {
+                Text("CARD CATALOG", color = Color(0xFFF5F5DC))
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ComponentThreeDContainer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(65.dp),
+                backgroundColor = Color(0xFF3B5F5F),
+                shadowColor = Color(0xFF273F3F),
+                cornerRadius = 15.dp,
+                isPushable = true,
+                onClick = { navController.navigate("leaderboard") }
+            ) {
+                Text("VIEW HIGH SCORES", color = Color(0xFFF5F5DC))
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ComponentThreeDContainer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(65.dp),
+                backgroundColor = Color(0xFF8B3A3A),
+                shadowColor = Color(0xFF5C2626),
+                cornerRadius = 15.dp,
+                isPushable = true,
+                onClick = { showExitDialog = true }
+            ) {
+                Text("EXIT", color = Color(0xFFF5F5DC))
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Transparent)
+                .padding(top = 90.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
                 painter = logoImage,
                 contentDescription = "Logo",
                 modifier = Modifier
-                    .height(175.dp)
-                    .padding(bottom = 16.dp)
+                    .size(290.dp)
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    showDifficultyDialog = true
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
-                shape = RoundedCornerShape(5.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text("PLAY")
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { navController.navigate("card_catalog") },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
-                shape = RoundedCornerShape(5.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text("CARD CATALOG")
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { navController.navigate("leaderboard") },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
-                shape = RoundedCornerShape(5.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text("VIEW HIGH SCORES")
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { showExitDialog = true },  // Show exit dialog instead of navigating
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
-                shape = RoundedCornerShape(5.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text("EXIT")
-            }
         }
 
         // Show exit dialog if state is true
