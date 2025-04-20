@@ -64,7 +64,7 @@ fun AppNavigation() {
     u.loadUsers()
     s.loadScores()
 
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = "card-catalog") {
         composable("test") { TestPage() }
         composable("login") { ViewLogin(navController) }
         composable("signup") { ViewSignup(navController) }
@@ -75,7 +75,7 @@ fun AppNavigation() {
             val duration = backStackEntry.arguments?.getString("duration")?.toInt() ?: 120
             ViewGame(cardNumber, duration, navController)
         }
-        composable("card_catalog") { ViewCardCatalog(navController) }
+        composable("card-catalog") { ViewCardCatalog(navController) }
         composable("card-test") { CardGrid() }
     }
 

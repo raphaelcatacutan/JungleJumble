@@ -101,7 +101,7 @@ fun ViewMainMenu(navController: NavController = rememberNavController()) {
                 shadowColor = Color(0xFF3A261C),
                 cornerRadius = 15.dp,
                 isPushable = true,
-                onClick = { navController.navigate("card_catalog") }
+                onClick = { navController.navigate("card-catalog") }
             ) {
                 Text("CARD CATALOG", color = Color(0xFFF5F5DC))
             }

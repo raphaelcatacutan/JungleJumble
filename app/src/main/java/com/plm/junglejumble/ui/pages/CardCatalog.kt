@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,6 +43,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
+import com.plm.junglejumble.ui.components.ComponentSwipeDetector
+import com.plm.junglejumble.ui.components.ComponentThreeDContainer
 
 data class AnimalCard(
     val id: Int,
@@ -256,202 +262,162 @@ var animals = listOf(
 fun ViewCardCatalog(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
 
-    var currentCardIndex by remember { mutableStateOf(0) }
+    var currentCardIndex by remember { mutableIntStateOf(0) }
     val currentCard = animals[currentCardIndex]
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
+    ComponentSwipeDetector(
+        onSwipeRight = {
+            if (currentCardIndex > 0) currentCardIndex--
+            else currentCardIndex = animals.size - 1
+        },
+        onSwipeLeft = {
+            if (currentCardIndex < animals.size - 1) currentCardIndex++
+            else currentCardIndex = 0
+        }
     ) {
-        Image(
-            painter = backgroundImage,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-            alpha = 0.8f
-        )
-
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+                .background(Color.Black)
         ) {
-            Box(
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF4CAF50))
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "CARD CATALOG",
-                    color = Color.Black,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            Image(
+                painter = backgroundImage,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                alpha = 0.8f
+            )
 
-            Box(
+            Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(horizontal = 32.dp, vertical = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
                 ComponentAnimalCardDisplay(
                     animalCard = currentCard,
                     modifier = Modifier
-                        .padding(horizontal = 20.dp)
+                        .padding(horizontal = 5.dp)
                         .fillMaxWidth()
                 )
 
-                IconButton(
-                    onClick = {
-                        if (currentCardIndex > 0) currentCardIndex--
-                        else currentCardIndex = animals.size - 1 // Loop to end
-                    },
+                ComponentThreeDContainer(
                     modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = 2.dp)
+                        .width(55.dp)
+                        .height(55.dp),
+                    backgroundColor = Color(0xFF78909C),
+                    shadowColor = Color(0xFF546E7A),
+                    cornerRadius = 15.dp,
+                    isPushable = true,
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Previous card",
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
                         tint = Color.White,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
-
-                IconButton(
-                    onClick = {
-                        if (currentCardIndex < animals.size - 1) currentCardIndex++
-                        else currentCardIndex = 0 // Loop to beginning
-                    },
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 2.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "Next card",
-                        tint = Color.White,
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
-
-
-            }
-
-            IconButton(
-                onClick = { navController.popBackStack() },
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(Color(0xFF388E3C), CircleShape)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
             }
         }
     }
+
 }
 
 @Composable
 fun ComponentAnimalCardDisplay(animalCard: AnimalCard, modifier: Modifier = Modifier) {
-    Column(
+    Box(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF4CAF50).copy(alpha = 0.9f))
-            .padding(bottom = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxWidth()
+            .padding(top = 50.dp), // space from top of screen
+        contentAlignment = Alignment.TopCenter
     ) {
-        Box(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFF81D4FA))
-                .border(2.dp, Color.White, RoundedCornerShape(12.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = animalCard.imageResId),
-                contentDescription = animalCard.name,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp),
-                contentScale = ContentScale.Fit
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFF4CAF50))
-                .padding(vertical = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = animalCard.name,
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Text(
-            text = animalCard.subtitle,
-            color = Color.White,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(vertical = 4.dp)
-        )
-
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFF388E3C).copy(alpha = 0.7f))
-                .padding(12.dp),
-            horizontalAlignment = Alignment.Start
+                .padding(top = 280.dp) // pushes the info box down so image overlaps
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ComponentLabeledInfo("Scientific Name", animalCard.scientificName)
-            ComponentLabeledInfo("Physical Characteristics", animalCard.physicalCharacteristics)
-            ComponentLabeledInfo("Habitat", animalCard.habitat)
-            ComponentLabeledInfo("Behavior", animalCard.behavior)
-            ComponentLabeledInfo("Fun Fact", animalCard.funFact, isFunFact = true)
+            ComponentThreeDContainer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(55.dp),
+                backgroundColor = Color(0xFFA5D6A7),
+                shadowColor = Color(0xFF388E3C),
+                cornerRadius = 15.dp,
+                isPushable = false
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = animalCard.name,
+                        color = Color.Black,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+
+            ComponentThreeDContainer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp),
+                backgroundColor = Color(0xFF5D4037 ),
+                shadowColor = Color(0xFF3E2723 ),
+                cornerRadius = 15.dp,
+                isPushable = false
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .padding(12.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    ComponentLabeledInfo("Scientific Name", animalCard.scientificName)
+                    ComponentLabeledInfo("Physical Characteristics", animalCard.physicalCharacteristics)
+                    ComponentLabeledInfo("Habitat", animalCard.habitat)
+                    ComponentLabeledInfo("Behavior", animalCard.behavior)
+                    ComponentLabeledInfo("Fun Fact", animalCard.funFact, isFunFact = true)
+                }
+            }
         }
 
+        // Image is on top and slightly overlaps the box below
+        Image(
+            painter = painterResource(id = animalCard.imageResId),
+            contentDescription = animalCard.name,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = (-10).dp)
+                .size(310.dp)
+        )
     }
 }
 
 @Composable
 fun ComponentLabeledInfo(label: String, value: String, isFunFact: Boolean = false) {
-    Column(modifier = Modifier.padding(vertical = 2.dp)) {
+    Column(modifier = Modifier.padding(vertical = 2.dp, horizontal = 2.dp)) {
         Text(
             text = "$label:",
             color = Color.White,
-            fontSize = 11.sp,
+            fontSize = 15.sp,
             fontWeight = FontWeight.Bold
         )
         Text(
             text = value,
             color = Color.White,
-            fontSize = 10.sp,
+            fontSize = 15.sp,
             fontStyle = if (isFunFact) FontStyle.Italic else FontStyle.Normal,
-            lineHeight = 10.sp
+            lineHeight = 15.sp
         )
     }
 }
