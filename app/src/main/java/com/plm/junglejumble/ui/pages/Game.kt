@@ -70,11 +70,14 @@ import kotlin.math.roundToInt
 import kotlin.math.sqrt
 import android.media.MediaPlayer
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import com.plm.junglejumble.ui.components.ComponentThreeDContainer
 import kotlinx.coroutines.CoroutineScope
+import kotlin.system.exitProcess
 
 var mediaPlayer: MediaPlayer? = null
 
@@ -404,6 +407,7 @@ fun PreviewGame() {
 
 @Composable
 fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, gameOverReason: String, cardCount: Int, duration: Int) {
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -511,77 +515,95 @@ fun DialogPaused(
     ) {
         Box(
             modifier = Modifier
-                .padding(16.dp)
-                .background(
-                    color = Color(0xFF73D478),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                .padding(24.dp)
+                .fillMaxSize()
+                .wrapContentHeight()
+                .graphicsLayer(clip = false)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ComponentThreeDContainer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(500.dp)
+                    .padding(top = 90.dp, bottom = 50.dp),
+                backgroundColor = Color(0xFF455A64),
+                shadowColor = Color(0xFF263238),
+                cornerRadius = 15.dp,
+                isPushable = false,
             ) {
-                // Title
-                Text(
-                    text = "Game pause",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
                     modifier = Modifier
-                        .background(Color(0xFF09A237), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                )
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp)
+                        .padding(top = 20.dp)
+                ) {
 
-                // Music
-                ComponentSettingRow("🎵 MUSIC:", musicEnabled) { isEnabled ->
-                    musicEnabled = isEnabled
-                    coroutineScope.launch {
-                        PreferencesManager.saveMusic(musicEnabled, context)
+                    // Music
+                    ComponentSettingRow("Background Music:", musicEnabled) { isEnabled ->
+                        musicEnabled = isEnabled
+                        coroutineScope.launch {
+                            PreferencesManager.saveMusic(musicEnabled, context)
 
-                        if (musicEnabled) {
-                            playMusic(context = context)
-                        } else {
-                            stopMusic()
+                            if (musicEnabled) {
+                                playMusic(context = context)
+                            } else {
+                                stopMusic()
+                            }
                         }
                     }
-                }
+                    // Sound toggle
+                    ComponentSettingRow("Sound Effects:", soundEnabled) { isEnabled ->
+                        soundEnabled = isEnabled
+                        coroutineScope.launch {
+                            PreferencesManager.saveSounds(soundEnabled, context)
+                        }
+                    }
 
-                // Sound toggle
-                ComponentSettingRow("🔊 SOUND:", soundEnabled) { isEnabled ->
-                    soundEnabled = isEnabled
-                    coroutineScope.launch {
-                        PreferencesManager.saveSounds(soundEnabled, context)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ComponentThreeDContainer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(55.dp),
+                        backgroundColor = Color(0xFF78909C),
+                        shadowColor = Color(0xFF546E7A),
+                        cornerRadius = 15.dp,
+                        isPushable = true,
+                        onClick = onDismiss
+                    ) {
+                        Text("Resume", color = Color(0xFFF5F5DC))
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ComponentThreeDContainer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(55.dp),
+                        backgroundColor = Color(0xFFEF5350),
+                        shadowColor = Color(0xFFC62828),
+                        cornerRadius = 15.dp,
+                        isPushable = true,
+                        onClick = {
+                            onDismiss()
+                            navController.navigate("main-menu")
+                        }
+                    ) {
+                        Text("Exit", color = Color(0xFFF5F5DC))
                     }
                 }
-
-                // Resume button
-                Button(
-                    onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                ) {
-                    Text("Resume", color = Color.White, fontSize = 16.sp)
-                }
-
-                // Exit button
-                Button(
-                    onClick = {
-                        onDismiss()
-                        navController.navigate("main-menu")
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                ) {
-                    Text("Exit", color = Color.White, fontSize = 16.sp)
-                }
             }
+
+
+            // Logo "floating" above dialog content
+            Image(
+                painter = painterResource(id = R.drawable.paused),
+                contentDescription = "Logo",
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-30).dp)
+                    .size(230.dp)
+            )
         }
     }
 }
@@ -595,7 +617,6 @@ fun playMusic(context: Context) {
 
 }
 
-
 // Stop music function
 fun stopMusic() {
     mediaPlayer?.stop()
@@ -607,15 +628,13 @@ fun stopMusic() {
 fun ComponentSettingRow(label: String, state: Boolean, onToggle: (Boolean) -> Unit) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
             modifier = Modifier.weight(1f),
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
             color = Color.White
         )
         Switch(
