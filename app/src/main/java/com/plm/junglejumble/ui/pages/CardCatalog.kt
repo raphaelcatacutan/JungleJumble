@@ -176,7 +176,7 @@ var animals = listOf(
         habitat = "Savannas, forests, mountains, and deserts of Africa and Asia.",
         behavior = "Solitary and stealthy, excellent climbers.",
         funFact = "Leopards often hide their prey in trees to protect it from scavengers.",
-        imageResId = R.drawable.leopard,
+        imageResId = R.drawable.cheetah,
         color = Color(0xFF9575CD)
     ),
     AnimalCard(
@@ -416,7 +416,7 @@ fun ComponentAnimalCardDisplay(animalCard: AnimalCard, modifier: Modifier = Modi
             contentDescription = animalCard.name,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .offset(y = (-10).dp)
+                .offset(y = 0.dp)
                 .size(310.dp)
         )
     }
