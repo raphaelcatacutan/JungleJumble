@@ -246,7 +246,7 @@ fun DialogExit(onDismiss: () -> Unit) {
 
             // Logo "floating" above dialog content
             Image(
-                painter = painterResource(id = R.drawable.paused),
+                painter = painterResource(id = R.drawable.exit),
                 contentDescription = "Logo",
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -349,7 +349,7 @@ fun DialogDifficulty(
 
             // Logo "floating" above dialog content
             Image(
-                painter = painterResource(id = R.drawable.paused),
+                painter = painterResource(id = R.drawable.options),
                 contentDescription = "Logo",
                 modifier = Modifier
                     .align(Alignment.TopCenter)

@@ -41,7 +41,7 @@ import com.plm.junglejumble.utils.SessionManager.userViewModel
 fun ViewLeaderBoard(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
 
-    val logoImage = painterResource(id = R.drawable.logo)
+    val logoImage = painterResource(id = R.drawable.leaderboards)
     val leaderboardEntries: List<Score> = scoreViewModel?.scores
         ?.sortedByDescending { it.score }
         ?.take(10)

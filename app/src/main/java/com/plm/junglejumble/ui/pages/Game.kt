@@ -477,7 +477,7 @@ fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, isWin: B
 
             // Logo "floating" above dialog content
             Image(
-                painter = painterResource(id = R.drawable.paused),
+                painter = painterResource(id = if (isWin) R.drawable.won else R.drawable.over),
                 contentDescription = "Logo",
                 modifier = Modifier
                     .align(Alignment.TopCenter)
