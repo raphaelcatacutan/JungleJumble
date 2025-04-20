@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,31 +19,32 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.FontScaling
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.plm.junglejumble.R
 import com.plm.junglejumble.database.models.Score
+import com.plm.junglejumble.ui.components.ComponentPopupContainer
+import com.plm.junglejumble.ui.components.ComponentThreeDContainer
+import com.plm.junglejumble.ui.components.CrackedShape
 import com.plm.junglejumble.utils.SessionManager.scoreViewModel
 import com.plm.junglejumble.utils.SessionManager.userViewModel
-
-data class LeaderboardEntry(
-    val rank: Int,
-    val name: String,
-    val score: Int,
-    val isTopThree: Boolean = false
-)
 
 @Composable
 fun ViewLeaderBoard(navController: NavController = rememberNavController()) {
     val backgroundImage = painterResource(id = R.drawable.background1)
 
+    val logoImage = painterResource(id = R.drawable.logo)
     val leaderboardEntries: List<Score> = scoreViewModel?.scores
         ?.sortedByDescending { it.score }
+        ?.take(10)
         ?: emptyList()
 
     Box(
@@ -52,7 +52,6 @@ fun ViewLeaderBoard(navController: NavController = rememberNavController()) {
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        // Background jungle
         Image(
             painter = backgroundImage,
             contentDescription = null,
@@ -64,103 +63,72 @@ fun ViewLeaderBoard(navController: NavController = rememberNavController()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(
+                    horizontal = 15.dp
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            // Title banner
-            Box(
+            Spacer(modifier = Modifier.height(200.dp))
+
+            ComponentPopupContainer(
                 modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF4CAF50))
-                    .padding(horizontal = 24.dp, vertical = 8.dp)
+                    .size(width = 315.dp, height = 530.dp),
+                backgroundColor = Color(0xFF8B4513),
+                shadowColor = Color(0xFF644E40),
+                shape = CrackedShape,
+                isPushable = false,
+                image = painterResource(R.drawable.ggg)
             ) {
-                Text(
-                    text = "LEADERBOARD",
-                    color = Color.Black,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(24.dp))
+                ) {
+                    Column {
+                        LazyColumn {
+                            itemsIndexed(leaderboardEntries) { index, entry ->
+                                ComponentLeaderboardRow(entry, index + 1)
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            ComponentThreeDContainer(
+                modifier = Modifier
+                    .width(55.dp)
+                    .height(55.dp),
+                backgroundColor = Color(0xFF78909C),
+                shadowColor = Color(0xFF546E7A),
+                cornerRadius = 15.dp,
+                isPushable = true,
+                onClick = { navController.navigate("main-menu") }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
                 )
             }
-
-            // Leaderboard content with rounded green background
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Color(0xFF4CAF50))
-                    .padding(16.dp)
-            ) {
-                Column {
-                    // Header row
-                    ComponentLeaderboardHeader()
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // List of entries
-                    LazyColumn {
-                        itemsIndexed(leaderboardEntries) { index, entry ->
-                            ComponentLeaderboardRow(entry, index + 1)
-                        }
-                    }
-
-                }
-            }
-
-            // Close button at the bottom
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                IconButton(
-                    onClick = { navController.popBackStack() },
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(Color(0xFF388E3C), CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
         }
-    }
-}
 
-@Composable
-fun ComponentLeaderboardHeader() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "RANK",
-            modifier = Modifier.weight(1f),
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            textAlign = TextAlign.Center
-        )
-        Text(
-            text = "NAME",
-            modifier = Modifier.weight(1f),
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            textAlign = TextAlign.Center
-        )
-        Text(
-            text = "SCORE",
-            modifier = Modifier.weight(1f),
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            textAlign = TextAlign.Center
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Transparent)
+                .padding(top = 5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Image(
+                painter = logoImage,
+                contentDescription = "Logo",
+                modifier = Modifier
+                    .size(295.dp)
+            )
+        }
     }
 }
 
@@ -169,7 +137,7 @@ fun ComponentLeaderboardRow(entry: Score, rank: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Rank (with medals for top 3)
@@ -186,7 +154,7 @@ fun ComponentLeaderboardRow(entry: Score, rank: Int) {
                         3 -> "🥉"
                         else -> rank.toString()
                     },
-                    fontSize = 18.sp,
+                    fontSize = 20.sp,
                     textAlign = TextAlign.Center
                 )
             } else {
@@ -200,19 +168,29 @@ fun ComponentLeaderboardRow(entry: Score, rank: Int) {
         }
 
         // Name field with light gray background
-        Box(
+        ComponentThreeDContainer(
             modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.LightGray.copy(alpha = 0.7f))
-                .padding(vertical = 6.dp),
-            contentAlignment = Alignment.Center
+                .width(100.dp)
+                .height(35.dp),
+            backgroundColor = when(rank) {
+                1 -> Color(0xFFA86D01)
+                2 -> Color(0xFF4A4A4A)
+                3 -> Color(0xFF6E3B3B)
+                else -> Color(0xFF8E6A3D)
+            },
+            shadowColor = when(rank) {
+                1 -> Color(0xFF3E2C18)
+                2 -> Color(0xFF2C2C2C)
+                3 -> Color(0xFF3D1F1F)
+                else -> Color(0xFF6A4E2F)
+            },
+            cornerRadius = 10.dp,
+            isPushable = false
         ) {
             Text(
                 text = userViewModel?.users?.find { it.id == entry.ownerId}?.name ?: "None",
                 fontSize = 16.sp,
-                color = Color.Black,
+                color = Color.White,
                 textAlign = TextAlign.Center
             )
         }
@@ -226,6 +204,7 @@ fun ComponentLeaderboardRow(entry: Score, rank: Int) {
                 text = entry.score.toString(),
                 fontSize = 16.sp,
                 color = Color.White,
+                fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
         }

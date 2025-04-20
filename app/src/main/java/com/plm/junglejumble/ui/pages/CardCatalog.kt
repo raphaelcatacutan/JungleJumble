@@ -310,7 +310,7 @@ fun ViewCardCatalog(navController: NavController = rememberNavController()) {
                     shadowColor = Color(0xFF546E7A),
                     cornerRadius = 15.dp,
                     isPushable = true,
-                    onClick = { navController.popBackStack() }
+                    onClick = { navController.navigate("main-menu") }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
