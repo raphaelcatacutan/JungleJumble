@@ -196,7 +196,7 @@ fun ViewLogin(navController: NavController = rememberNavController()) {
                         isPushable = true,
                         onClick = {
                             val user = userViewModel?.users?.find {
-                                it.name == "Raphael" && it.password == "A"
+                                it.name == username && it.password == password
                             }
                             if (user == null) {
                                 errorMessage = "User not found"
