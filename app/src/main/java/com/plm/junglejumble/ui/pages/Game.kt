@@ -69,6 +69,11 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 import android.media.MediaPlayer
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.draw.clip
+import com.plm.junglejumble.ui.components.ComponentThreeDContainer
 import kotlinx.coroutines.CoroutineScope
 
 var mediaPlayer: MediaPlayer? = null
@@ -84,12 +89,12 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
     var isGameOver by remember { mutableStateOf(false) }
     var gameOverReason by remember { mutableStateOf("") }
 
-
     val score = remember { mutableIntStateOf(0) }
 
     // Timer
     var time by remember { mutableIntStateOf(duration) }
     val timer = "%02d:%02d".format(time / 60, time % 60)
+
     LaunchedEffect(isPaused) {
         while (true) {
             if (!isPaused && !isGameOver) {
@@ -127,59 +132,108 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
-            painter = painterResource(id = R.drawable.background1), // 🖼️ set this
+            painter = when(cardCount) {
+                12 -> painterResource(R.drawable.bg2)
+                16 -> painterResource(R.drawable.bg3)
+                36 -> painterResource(R.drawable.bg4)
+                else -> painterResource(R.drawable.background1)
+            }, // 🖼️ set this
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
+                .padding(top = 30.dp, bottom = 50.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.CenterEnd
             ) {
-                Text(
-                    text = "EASY MODE",
-                    style = MaterialTheme.typography.titleLarge.copy(color = Color.White)
-                )
-
-                IconButton(
-                    onClick = {
-                        isPaused = true
-                    },
-                    modifier = Modifier.size(36.dp)
+                ComponentThreeDContainer(
+                    modifier = Modifier
+                        .width(55.dp)
+                        .height(55.dp),
+                    backgroundColor = Color(0xFF78909C),
+                    shadowColor = Color(0xFF546E7A),
+                    cornerRadius = 15.dp,
+                    isPushable = true,
+                    onClick = { isPaused = true }
                 ) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = "Pause",
-                        tint = Color.White
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
-            // Timer Box
-            Box(
-                contentAlignment = Alignment.Center,
+            Row(
                 modifier = Modifier
-                    .background(Color(0xAA2ECC71), shape = RoundedCornerShape(16.dp))
-                    .padding(horizontal = 24.dp, vertical = 8.dp)
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = timer,
-                    style = MaterialTheme.typography.headlineSmall.copy(color = Color.White)
-                )
+                ComponentThreeDContainer(
+                    modifier = Modifier
+                        .width(160.dp)
+                        .height(75.dp),
+                    backgroundColor = Color(0xFF9E7B3D  ),
+                    shadowColor = Color(0xFF6A4F1B ),
+                    cornerRadius = 15.dp
+                ) {
+                    // Timer Box
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        Text(
+                            text = when(cardCount) {
+                                12 -> "Easy Mode"
+                                16 -> "Medium Mode"
+                                36 -> "Hard Mode"
+                                else -> "Medium Mode"
+                            },
+                            fontSize = 15.sp,
+                            style = MaterialTheme.typography.titleLarge.copy(color = Color.White),
+                            lineHeight = 16.sp
+                        )
+                        Text(
+                            text = timer,
+                            fontSize = 20.sp,
+                            style = MaterialTheme.typography.headlineSmall.copy(color = Color.White),
+                            lineHeight = 20.sp
+                        )
+                    }
+                }
+                ComponentThreeDContainer(
+                    modifier = Modifier
+                        .width(175.dp)
+                        .height(50.dp),
+                    backgroundColor = Color(0xFF8B3A3A),
+                    shadowColor = Color(0xFF531F1F),
+                    cornerRadius = 15.dp
+                ) {
+                    // Score Display
+                    Box(
+                        modifier = Modifier
+                    ) {
+                        Text(
+                            text = "Score: ${score.intValue}",
+                            style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
+                        )
+                    }
+                }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
 
             Box(
                 modifier = Modifier
@@ -190,16 +244,16 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
                 val grid = sqrt(cardCount.toDouble()).toInt()
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(grid),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
                         .wrapContentHeight()
                 ) {
-                    Log.w("ComposeWarning", pairs.toString())
                     items(cardCount) { index ->
                         val i = pairs.indexOfFirst { it.first == index || it.second == index }
 
                         val card = cards[index]
+
                         ComponentFlipCard(
                             isSelected = card.isSelected,
                             onClick = {
@@ -247,44 +301,41 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
                                 }
                             },
                             index = i
-                        )
+                        ) {
+                            Box {
+                                Image(
+                                    painter = painterResource(id = R.drawable.background1),
+                                    contentDescription = "Jungle Card",
+                                    contentScale = ContentScale.FillWidth
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .background(Color.White.copy(alpha = 0.25f)) // Adjust alpha for brightness
+                                )
+                            }
+                            Image(
+                                painter = painterResource(id = R.drawable.logo),
+                                contentDescription = "Jungle Card",
+                                contentScale = ContentScale.FillWidth
+                            )
+                        }
                     }
-
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
+            ComponentThreeDContainer(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
+                    .width(175.dp)
+                    .height(50.dp),
+                backgroundColor = Color(0xFF3B5E3B),
+                shadowColor = Color(0xFF1F331F),
+                cornerRadius = 15.dp
             ) {
-                // Flip Counter
-                Box(
-                    modifier = Modifier
-                        .background(Color(0xFF80DEEA), shape = RoundedCornerShape(12.dp))
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = "Remaining Pairs: $remainingCards",
-                        style = MaterialTheme.typography.bodyLarge.copy(color = Color.Black)
-                    )
-                }
-
-                // Score Display
-                Box(
-                    modifier = Modifier
-                        .background(Color(0xFFFFCDD2), shape = RoundedCornerShape(12.dp))
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = "Score: ${score.intValue}",
-                        style = MaterialTheme.typography.bodyLarge.copy(color = Color.Black)
-                    )
-                }
+                Text(
+                    text = "Remaining Pairs: $remainingCards",
+                    style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
+                )
             }
         }
 
@@ -304,7 +355,8 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
 fun ComponentFlipCard(
     isSelected: Boolean,
     onClick: () -> Unit,
-    index: Int
+    index: Int,
+    front: @Composable () -> Unit
 )
 {
     val rotation = animateFloatAsState(
@@ -320,30 +372,24 @@ fun ComponentFlipCard(
                 rotationY = rotation.value
                 cameraDistance = 8 * density
             }
-            .background(
-                color = Color(0xFFB2FF59), // any color you want
-                shape = RoundedCornerShape(16.dp)
-            )
+            .border(1.dp, Color(0xFFFFB900), shape = RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
             .clickable {
                 onClick()
             },
         contentAlignment = Alignment.Center,
     ) {
         if (rotation.value <= 90f) {
-            Image(
-                painter = painterResource(id = R.drawable.logo), // 🔄 your card back
-                contentDescription = "Jungle Card",
-                contentScale = ContentScale.Crop
-            )
+            front()
         } else {
             val imageId = animals[index].imageResId
             Image(
-                painter = painterResource(id = imageId), // 🔄 your card back
+                painter = painterResource(id = imageId),
                 contentDescription = "Jungle Card",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.graphicsLayer(
-                    rotationY = 180f
-                )
+                contentScale = ContentScale.FillHeight,
+                modifier = Modifier
+                    .graphicsLayer(rotationY = 180f)
+                    .padding(5.dp)
             )
         }
     }
