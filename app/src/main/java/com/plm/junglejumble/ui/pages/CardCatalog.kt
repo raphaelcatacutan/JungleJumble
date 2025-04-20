@@ -55,7 +55,8 @@ data class AnimalCard(
     val habitat: String,
     val behavior: String,
     val funFact: String,
-    val imageResId: Int
+    val imageResId: Int,
+    val color: Color
 )
 var animals = listOf(
     AnimalCard(
@@ -67,7 +68,8 @@ var animals = listOf(
         habitat = "Forests, tundras, and mountains around the world.",
         behavior = "Omnivorous, hibernate in winter (some species).",
         funFact = "Polar bears have black skin under their white fur for better heat absorption.",
-        imageResId = R.drawable.bear
+        imageResId = R.drawable.bear,
+        color = Color(0xFFD4E157)
     ),
     AnimalCard(
         id = 1,
@@ -78,7 +80,8 @@ var animals = listOf(
         habitat = "Grasslands, savannas, and woodlands of Africa and India.",
         behavior = "Social animals living in groups called prides.",
         funFact = "Lions roar to communicate, and their roar can be heard up to 5 miles away!",
-        imageResId = R.drawable.lion
+        imageResId = R.drawable.lion,
+        color = Color(0xFFFFEB3B)
     ),
     AnimalCard(
         id = 2,
@@ -89,7 +92,8 @@ var animals = listOf(
         habitat = "Found in various environments, especially near water.",
         behavior = "Amphibians, known for their croaks and leaping ability.",
         funFact = "Frogs absorb water through their skin, so they don’t need to drink!",
-        imageResId = R.drawable.frog
+        imageResId = R.drawable.frog,
+        color = Color(0xFFFFC107)
     ),
     AnimalCard(
         id = 3,
@@ -100,7 +104,8 @@ var animals = listOf(
         habitat = "Tropical rainforests, savannas, or mountainous areas.",
         behavior = "Intelligent and social, often live in troops.",
         funFact = "Some monkeys, like capuchins, use tools to forage food!",
-        imageResId = R.drawable.monkey
+        imageResId = R.drawable.monkey,
+        color = Color(0xFFFF9800)
     ),
     AnimalCard(
         id = 4,
@@ -111,7 +116,8 @@ var animals = listOf(
         habitat = "Forests, grasslands, mountains, and even urban areas.",
         behavior = "Solitary hunters, active mostly at night (nocturnal).",
         funFact = "Foxes can hear prey digging underground!",
-        imageResId = R.drawable.fox
+        imageResId = R.drawable.fox,
+        color = Color(0xFFFF5722)
     ),
     AnimalCard(
         id = 5,
@@ -122,7 +128,8 @@ var animals = listOf(
         habitat = "Dense forests, grasslands, and mangroves of Asia.",
         behavior = "Solitary and territorial, excellent swimmers.",
         funFact = "No two tigers have the same stripe pattern—it’s like a fingerprint!",
-        imageResId = R.drawable.tiger
+        imageResId = R.drawable.tiger,
+        color = Color(0xFFF44336)
     ),
     AnimalCard(
         id = 6,
@@ -133,7 +140,8 @@ var animals = listOf(
         habitat = "Mountains, forests, and open areas near water.",
         behavior = "Skilled hunters, often soar high while searching for prey.",
         funFact = "Eagles can spot prey over 2 miles away!",
-        imageResId = R.drawable.eagle
+        imageResId = R.drawable.eagle,
+        color = Color(0xFFE91E63)
     ),
     AnimalCard(
         id = 7,
@@ -144,7 +152,8 @@ var animals = listOf(
         habitat = "Savannas, grasslands, and deserts of Africa and Asia.",
         behavior = "Known for their distinctive \"laugh\" and scavenging habits.",
         funFact = "Hyenas are more closely related to cats than dogs!",
-        imageResId = R.drawable.hyena
+        imageResId = R.drawable.hyena,
+        color = Color(0xFFEC407A)
     ),
     AnimalCard(
         id = 8,
@@ -155,7 +164,8 @@ var animals = listOf(
         habitat = "Bamboo forests in the mountains of China.",
         behavior = "Solitary and peaceful, they spend most of their day eating bamboo.",
         funFact = "A panda’s diet is 99% bamboo, even though they have carnivorous digestive systems!",
-        imageResId = R.drawable.panda
+        imageResId = R.drawable.panda,
+        color = Color(0xFFBA68C8)
     ),
     AnimalCard(
         id = 9,
@@ -166,7 +176,8 @@ var animals = listOf(
         habitat = "Savannas, forests, mountains, and deserts of Africa and Asia.",
         behavior = "Solitary and stealthy, excellent climbers.",
         funFact = "Leopards often hide their prey in trees to protect it from scavengers.",
-        imageResId = R.drawable.leopard
+        imageResId = R.drawable.leopard,
+        color = Color(0xFF9575CD)
     ),
     AnimalCard(
         id = 10,
@@ -177,7 +188,8 @@ var animals = listOf(
         habitat = "Grasslands, forests, and savannas in Africa and Asia.",
         behavior = "Highly social and intelligent, live in herds.",
         funFact = "Elephants can recognize themselves in a mirror—a sign of self-awareness!",
-        imageResId = R.drawable.elephant
+        imageResId = R.drawable.elephant,
+        color = Color(0xFF7E57C2)
     ),
     AnimalCard(
         id = 11,
@@ -188,7 +200,8 @@ var animals = listOf(
         habitat = "Freshwater rivers, lakes, and wetlands in tropical regions.",
         behavior = "Ambush predator, spends time basking in the sun.",
         funFact = "Crocodiles can hold their breath underwater for up to an hour!",
-        imageResId = R.drawable.crocodile
+        imageResId = R.drawable.crocodile,
+        color = Color(0xFF5C6BC0)
     ),
     AnimalCard(
         id = 12,
@@ -199,7 +212,8 @@ var animals = listOf(
         habitat = "Savannas and woodlands of Africa.",
         behavior = "Feeds on tall trees, uses height for scanning predators.",
         funFact = "Giraffes have the same number of neck vertebrae as humans—just larger!",
-        imageResId = R.drawable.giraffe
+        imageResId = R.drawable.giraffe,
+        color = Color(0xFF42A5F5)
     ),
     AnimalCard(
         id = 13,
@@ -210,7 +224,8 @@ var animals = listOf(
         habitat = "Tropical rainforests and lowland swamps in Africa.",
         behavior = "Highly social, lives in family groups called troops.",
         funFact = "Gorillas use tools in the wild to obtain food!",
-        imageResId = R.drawable.gorilla
+        imageResId = R.drawable.gorilla,
+        color = Color(0xFF29B6F6)
     ),
     AnimalCard(
         id = 14,
@@ -221,18 +236,20 @@ var animals = listOf(
         habitat = "Eucalyptus forests in Australia.",
         behavior = "Herbivorous, spends most time sleeping and eating leaves.",
         funFact = "Koalas have fingerprints that are very similar to humans'!",
-        imageResId = R.drawable.koala
+        imageResId = R.drawable.koala,
+        color = Color(0xFF26C6DA)
     ),
     AnimalCard(
         id = 15,
-        name = "Horny Groundstomp",
+        name = "Rhiny Groundstomp",
         subtitle = "Rhino",
         scientificName = "Rhinocerotidae family",
         physicalCharacteristics = "Large body, thick skin, and horn(s) on the snout.",
         habitat = "Grasslands and savannas in Africa and Asia.",
         behavior = "Solitary grazers, territorial over water holes.",
         funFact = "A group of rhinos is called a crash!",
-        imageResId = R.drawable.rhino
+        imageResId = R.drawable.rhino,
+        color = Color(0xFF26A69A)
     ),
     AnimalCard(
         id = 16,
@@ -243,7 +260,8 @@ var animals = listOf(
         habitat = "Forests, tundras, and grasslands around the Northern Hemisphere.",
         behavior = "Social animals living in packs, hunt cooperatively.",
         funFact = "Wolves communicate using howls, body language, and scent marking!",
-        imageResId = R.drawable.wolf
+        imageResId = R.drawable.wolf,
+        color = Color(0xFF66BB6A)
     ),
     AnimalCard(
         id = 17,
@@ -254,7 +272,8 @@ var animals = listOf(
         habitat = "Tropical and subtropical regions, primarily rainforests.",
         behavior = "Highly social and intelligent, often mimic sounds.",
         funFact = "Parrots can live for over 50 years and some species are great talkers!",
-        imageResId = R.drawable.parrot
+        imageResId = R.drawable.parrot,
+        color = Color(0xFF9CCC65)
     )
 )
 

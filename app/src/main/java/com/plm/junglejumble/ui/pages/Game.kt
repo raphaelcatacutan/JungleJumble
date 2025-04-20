@@ -372,8 +372,9 @@ fun ComponentFlipCard(
                 rotationY = rotation.value
                 cameraDistance = 8 * density
             }
-            .border(1.dp, Color(0xFFFFB900), shape = RoundedCornerShape(16.dp))
+            .border(2.dp, Color(0xFF3A2B00), shape = RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
+            .background(animals[index].color)
             .clickable {
                 onClick()
             },
@@ -467,7 +468,6 @@ fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, gameOver
         }
     }
 }
-
 
 @Composable
 fun DialogPaused(
