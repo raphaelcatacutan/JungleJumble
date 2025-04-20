@@ -1,7 +1,6 @@
 package com.plm.junglejumble.ui.pages
 
 import android.content.Context
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -26,10 +25,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -50,7 +46,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,12 +67,10 @@ import android.media.MediaPlayer
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import com.plm.junglejumble.ui.components.ComponentThreeDContainer
 import kotlinx.coroutines.CoroutineScope
-import kotlin.system.exitProcess
 
 var mediaPlayer: MediaPlayer? = null
 
@@ -90,7 +83,7 @@ data class CardItem(
 fun ViewGame(cardCount: Int, duration: Int, navController: NavController = rememberNavController()) {
     var isPaused by remember { mutableStateOf(false) }
     var isGameOver by remember { mutableStateOf(false) }
-    var gameOverReason by remember { mutableStateOf("") }
+    var isWin by remember { mutableStateOf(false) }
 
     val score = remember { mutableIntStateOf(0) }
 
@@ -105,7 +98,7 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
                 time -= 1
                 if (time <= 0) {
                     isGameOver = true
-                    gameOverReason = "Timer ran out"
+                    isWin = false
                     scoreViewModel?.addScore(Score(ownerId = currentUser!!.id, score = score.intValue))
                 }
             } else {
@@ -288,7 +281,7 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
                                             remainingCards--
                                             if (remainingCards <= 0) {
                                                 isGameOver = true
-                                                gameOverReason = "You Won"
+                                                isWin = true
                                                 scoreViewModel?.addScore(Score(ownerId = currentUser!!.id, score = score.intValue))
                                             }
                                         } else {
@@ -349,7 +342,7 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
 
         // Show exit dialog if state is true
         if (isGameOver) {
-            DialogGameOver(onDismiss = { isGameOver = false }, navController, gameOverReason, cardCount, duration)
+            DialogGameOver(onDismiss = { isGameOver = false }, navController, isWin, cardCount, duration)
         }
     }
 }
@@ -406,8 +399,7 @@ fun PreviewGame() {
 }
 
 @Composable
-fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, gameOverReason: String, cardCount: Int, duration: Int) {
-
+fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, isWin: Boolean, cardCount: Int, duration: Int) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -417,58 +409,81 @@ fun DialogGameOver(onDismiss: () -> Unit, navController: NavController, gameOver
     ) {
         Box(
             modifier = Modifier
-                .padding(16.dp)
-                .background(
-                    color = Color(0xFF73D478),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                .padding(24.dp)
+                .fillMaxSize()
+                .wrapContentHeight()
+                .graphicsLayer(clip = false)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ComponentThreeDContainer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(425.dp)
+                    .padding(top = 115.dp, bottom = 50.dp),
+                backgroundColor = Color(0xFF455A64),
+                shadowColor = Color(0xFF263238),
+                cornerRadius = 15.dp,
+                isPushable = false,
             ) {
-                // Title
-                Text(
-                    text = gameOverReason,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier
-                        .background(Color(0xFF09A237), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                )
-
-                // Resume button
-                Button(
-                    onClick = {
-                        onDismiss()
-                        navController.navigate("game/${cardCount}/${duration}")
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
-                    shape = RoundedCornerShape(12.dp),
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .padding(horizontal = 30.dp)
+                        .padding(top = 20.dp)
                 ) {
-                    Text("Play Again", color = Color.White, fontSize = 16.sp)
-                }
+                    Text(
+                        text = if (isWin) "Great Job! Let's Play Again" else "Nice Try! You'll get it next time",
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ComponentThreeDContainer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(55.dp),
+                        backgroundColor = Color(0xFF04773D),
+                        shadowColor = Color(0xFF012317),
+                        cornerRadius = 15.dp,
+                        isPushable = true,
+                        onClick = {
+                            onDismiss()
+                            navController.navigate("game/${cardCount}/${duration}")
+                        }
+                    ) {
+                        Text("Play Again", color = Color(0xFFF5F5DC))
+                    }
 
-                // Exit button
-                Button(
-                    onClick = {
-                        onDismiss()
-                        navController.navigate("main-menu")
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                ) {
-                    Text("Exit", color = Color.White, fontSize = 16.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ComponentThreeDContainer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(55.dp),
+                        backgroundColor = Color(0xFFEF5350),
+                        shadowColor = Color(0xFFC62828),
+                        cornerRadius = 15.dp,
+                        isPushable = true,
+                        onClick = {
+                            onDismiss()
+                            navController.navigate("main-menu")
+                        }
+                    ) {
+                        Text("Exit", color = Color(0xFFF5F5DC))
+                    }
                 }
             }
+
+
+            // Logo "floating" above dialog content
+            Image(
+                painter = painterResource(id = R.drawable.paused),
+                contentDescription = "Logo",
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-30).dp)
+                    .size(230.dp)
+            )
         }
     }
 }
