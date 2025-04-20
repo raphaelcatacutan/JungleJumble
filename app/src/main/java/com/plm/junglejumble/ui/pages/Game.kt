@@ -84,6 +84,7 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
     var isPaused by remember { mutableStateOf(false) }
     var isGameOver by remember { mutableStateOf(false) }
     var isWin by remember { mutableStateOf(false) }
+    var isProcessing by remember { mutableStateOf(false) }
 
     val score = remember { mutableIntStateOf(0) }
 
@@ -93,7 +94,7 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
 
     LaunchedEffect(isPaused) {
         while (true) {
-            if (!isPaused && !isGameOver) {
+            if (!isPaused && !isGameOver && !isProcessing) {
                 delay(1000L) // 1 second
                 time -= 1
                 if (time <= 0) {
@@ -119,7 +120,6 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
 
     var remainingCards by remember { mutableIntStateOf(cardCount/2) }
     var selectedIndices by remember { mutableStateOf<List<Int>>(emptyList()) }
-    var isProcessing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     BackHandler(enabled = true) {
