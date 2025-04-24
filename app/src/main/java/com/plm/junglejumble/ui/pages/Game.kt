@@ -73,6 +73,7 @@ import com.plm.junglejumble.ui.components.ComponentThreeDContainer
 import kotlinx.coroutines.CoroutineScope
 
 var mediaPlayer: MediaPlayer? = null
+var flipPlayer: MediaPlayer? = null
 
 data class CardItem(
     val id: Int,
@@ -250,10 +251,19 @@ fun ViewGame(cardCount: Int, duration: Int, navController: NavController = remem
 
                         val card = cards[index]
 
+                        val context = LocalContext.current
                         ComponentFlipCard(
                             isSelected = card.isSelected,
                             onClick = {
                                 if (isProcessing || card.isSelected) return@ComponentFlipCard
+
+                                if (flipPlayer == null) {
+                                    flipPlayer = MediaPlayer.create(context, R.raw.flip) // Replace with your actual music file in `res/raw`
+                                    flipPlayer?.isLooping = false
+                                }
+                                // Optional: Loop the music
+                                flipPlayer?.seekTo(100)
+                                flipPlayer?.start()
 
                                 selectedIndices = selectedIndices + index
                                 cards = cards.mapIndexed { i, item ->
